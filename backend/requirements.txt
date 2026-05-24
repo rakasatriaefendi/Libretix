@@ -1,7 +1,7 @@
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 pydantic==2.7.1
-supabase==2.4.6
+supabase==2.15.3
 upstash-redis==1.1.0
 yfinance==1.4.0
 feedparser==6.0.11
