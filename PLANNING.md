@@ -190,4 +190,16 @@ Daftarkan akun dan ambil API key gratis di:
 - [ ] https://upstash.com — redis cache
 - [ ] https://resend.com — email alert
 
+### 💡 Skenario Arsitektur Dual-Source Emas (Post-Launch)
+Untuk memberikan pengalaman analisis komoditas kelas profesional tanpa merusak limit kuota gratis, fitur emas akan memisahkan peran kedua data source:
+
+1. **Yahoo Finance (`yfinance` - Ticker: `GC=F`)**
+   - **Fokus Fitur:** Menggambar Grafik Candlestick Utama (TradingView) & Training Model ML (Prophet).
+   - **Alasan:** Menyediakan data historis harian/mingguan yang sangat panjang, stabil, dan *unlimited* (bebas kuota).
+
+2. **GoldAPI.io (XAU/IDR Spot Price)**
+   - **Fokus Fitur:** Ticker Live Card ("Harga Emas Fisik Hari Ini dalam Rp/Gram") & Kalkulator Simulasi Investasi Logam Mulia.
+   - **Alasan:** Menyediakan konversi instan ke Rupiah per gram secara akurat dari pasar fisik tanpa perlu dihitung manual di backend.
+   - **Strategi Hemat Kuota:** Karena limit *free tier* hanya 100 request/hari, data dari GoldAPI.io wajib disimpan ke **Upstash Redis Cache** dengan masa kedaluwarsa (TTL) 2 jam. Backend hanya mengetuk API ini 12 kali sehari, sehingga aman dari limit bengkak walaupun web dibuka oleh ribuan user.
+
 Simpan semua key di `.env.local` (frontend) dan `.env` (backend), jangan di-commit ke GitHub!
