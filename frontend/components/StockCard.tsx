@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/api";
 import type { StockSummary } from "@/lib/types";
 
 export function StockCard({ stock }: { stock: StockSummary }) {
@@ -20,7 +21,7 @@ export function StockCard({ stock }: { stock: StockSummary }) {
             <div className="text-xs text-white/45">{stock.market ?? ""}</div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-semibold">${stock.price.toFixed(2)}</div>
+            <div className="text-sm font-semibold">{formatCurrency(stock.price, stock.market, stock.ticker)}</div>
             <div className={positive ? "flex items-center gap-1 text-xs text-emerald-400" : "flex items-center gap-1 text-xs text-rose-400"}>
               {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {changePct.toFixed(2)}%

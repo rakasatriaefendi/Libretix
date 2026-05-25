@@ -1,7 +1,7 @@
 import os
 import json
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Optional
 
 import yfinance as yf
 from fastapi import APIRouter, HTTPException, Query
@@ -28,7 +28,7 @@ def get_redis() -> Redis | None:
     return _redis
 
 
-def _cache_get(key: str) -> dict | None:
+def _cache_get(key: str) -> Any | None:
     redis = get_redis()
     if not redis:
         return None
@@ -39,7 +39,7 @@ def _cache_get(key: str) -> dict | None:
         return None
 
 
-def _cache_set(key: str, value: dict, ttl: int = CACHE_TTL) -> None:
+def _cache_set(key: str, value: Any, ttl: int = CACHE_TTL) -> None:
     redis = get_redis()
     if not redis:
         return
@@ -49,6 +49,29 @@ def _cache_set(key: str, value: dict, ttl: int = CACHE_TTL) -> None:
         pass
 
 
+def _to_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _with_change(current: dict[str, Any], previous: dict[str, Any] | None = None) -> dict[str, Any]:
+    price = _to_float(current.get("price"))
+    previous_price = _to_float(previous.get("price")) if previous else None
+    open_price = _to_float(current.get("open"))
+    basis_price = previous_price if previous_price and previous_price > 0 else open_price
+
+    if price is None or not basis_price or basis_price <= 0:
+        return {**current, "change": 0.0, "change_pct": 0.0}
+
+    change = round(price - basis_price, 4)
+    change_pct = round((change / basis_price) * 100, 2)
+    return {**current, "change": change, "change_pct": change_pct}
+
+
 # -------------------------------------------------------------------
 # GET /stocks/latest — semua saham terbaru dari DB
 # -------------------------------------------------------------------
@@ -56,7 +79,7 @@ def _cache_set(key: str, value: dict, ttl: int = CACHE_TTL) -> None:
 async def get_latest_stocks(
     market: Optional[str] = Query(None, description="Filter: 'US' atau 'IDX'")
 ):
-    cache_key = f"latest_stocks:{market or 'all'}"
+    cache_key = f"latest_stocks_v2:{market or 'all'}"
     cached = _cache_get(cache_key)
     if cached:
         return cached
@@ -74,14 +97,18 @@ async def get_latest_stocks(
     result = query.limit(500).execute()
     data = result.data
 
-    # Deduplicate: ambil yang terbaru per ticker
-    seen: dict[str, dict] = {}
+    # Keep the two newest rows per ticker so dashboard change can be derived.
+    seen: dict[str, list[dict[str, Any]]] = {}
     for row in data:
         ticker = row["ticker"]
-        if ticker not in seen:
-            seen[ticker] = row
+        ticker_rows = seen.setdefault(ticker, [])
+        if len(ticker_rows) < 2:
+            ticker_rows.append(row)
 
-    rows = list(seen.values())
+    rows = [
+        _with_change(ticker_rows[0], ticker_rows[1] if len(ticker_rows) > 1 else None)
+        for ticker_rows in seen.values()
+    ]
     _cache_set(cache_key, rows, ttl=120)
     return rows
 
@@ -114,13 +141,7 @@ async def get_stock(ticker: str):
     current = rows[0]
     prev = rows[1] if len(rows) > 1 else None
 
-    change = None
-    change_pct = None
-    if prev and prev["price"]:
-        change = round(current["price"] - prev["price"], 4)
-        change_pct = round((change / prev["price"]) * 100, 2)
-
-    response = {**current, "change": change, "change_pct": change_pct}
+    response = _with_change(current, prev)
     _cache_set(cache_key, response, ttl=60)
     return response
 

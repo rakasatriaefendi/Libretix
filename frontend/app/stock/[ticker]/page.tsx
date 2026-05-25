@@ -3,7 +3,7 @@ import { Chart } from "@/components/Chart";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { getStockDetail, getStockHistory } from "@/lib/api";
+import { formatCompactVolume, formatCurrency, getStockDetail, getStockHistory } from "@/lib/api";
 import type { OhlcvPoint, Period } from "@/lib/types";
 
 const periods: Period[] = ["1d", "5d", "1mo", "3mo", "1y"];
@@ -25,11 +25,15 @@ function normalizeChartData(rows: OhlcvPoint[]): OhlcvPoint[] {
 async function StockDetailView({ ticker, period }: { ticker: string; period: Period }) {
   const [detail, history] = await Promise.all([getStockDetail(ticker), getStockHistory(ticker, period)]);
   const chartData = normalizeChartData(history);
-  const latestVolume = chartData.at(-1)?.volume ?? detail.volume ?? null;
-  const change = detail.change ?? (detail.open && detail.open > 0 ? detail.price - detail.open : 0);
-  const changePct = detail.change_pct ?? (detail.open && detail.open > 0 ? ((detail.price - detail.open) / detail.open) * 100 : 0);
+  const firstBar = chartData[0];
+  const lastBar = chartData.at(-1);
+  const statOpen = firstBar?.open ?? null;
+  const statHigh = chartData.length > 0 ? Math.max(...chartData.map((bar) => bar.high)) : null;
+  const statLow = chartData.length > 0 ? Math.min(...chartData.map((bar) => bar.low)) : null;
+  const statVolume = lastBar?.volume ?? null;
+  const change = statOpen && statOpen > 0 ? detail.price - statOpen : 0;
+  const changePct = statOpen && statOpen > 0 ? (change / statOpen) * 100 : 0;
   const positive = changePct >= 0;
-
   return (
     <div className="space-y-4">
       <Link href="/dashboard" className="inline-flex">
@@ -49,7 +53,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
               <p className="text-sm text-white/45">{detail.name ?? "Market detail"}</p>
             </div>
             <div className={positive ? "text-right text-emerald-400" : "text-right text-rose-400"}>
-              <div className="text-3xl font-semibold">${detail.price.toFixed(2)}</div>
+              <div className="text-3xl font-semibold">{formatCurrency(detail.price, detail.market, ticker)}</div>
               <div className="text-sm">
                 {change >= 0 ? "+" : ""}
                 {change.toFixed(2)} ({changePct.toFixed(2)}%)
@@ -80,14 +84,16 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {([
-            ["Open", detail.open],
-            ["High", detail.high],
-            ["Low", detail.low],
-            ["Volume", latestVolume]
+            ["Open", statOpen],
+            ["High", statHigh],
+            ["Low", statLow],
+            ["Volume", statVolume]
           ] as [string, number | null | undefined][]).map(([label, value]) => (
             <div key={label} className="rounded-lg border border-white/10 bg-black/40 p-3">
               <div className="text-xs text-white/45">{label}</div>
-              <div className="mt-1 text-sm font-medium">{value ?? "-"}</div>
+              <div className="mt-1 text-sm font-medium">
+                {label === "Volume" ? formatCompactVolume(value) : value !== null && value !== undefined ? formatCurrency(value, detail.market, ticker) : "-"}
+              </div>
             </div>
           ))}
         </CardContent>
