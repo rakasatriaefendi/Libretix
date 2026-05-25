@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Harus di-set SEBELUM logging.getLogger
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -21,10 +20,13 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
+# RSS feeds yang accessible dari server luar negeri (GitHub Actions)
 RSS_FEEDS = {
-    "CNBC Indonesia": "https://www.cnbcindonesia.com/rss",
-    "Bisnis.com":     "https://bisnis.com/rss",
-    "Reuters":        "https://feeds.reuters.com/reuters/businessNews",
+    "Reuters Business":     "https://feeds.reuters.com/reuters/businessNews.rss",
+    "Yahoo Finance":        "https://finance.yahoo.com/rss/topstories",
+    "MarketWatch":          "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+    "Seeking Alpha":        "https://seekingalpha.com/feed.xml",
+    "Investing.com":        "https://www.investing.com/rss/news.rss",
 }
 
 
@@ -43,20 +45,26 @@ def scrape_rss() -> list[dict]:
                 if hasattr(entry, "published_parsed") and entry.published_parsed:
                     published = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc).isoformat()
 
+                title = entry.get("title", "").strip()
+                if not title:
+                    continue
+
                 records.append({
-                    "title":             entry.get("title", ""),
-                    "url":               entry.get("link", ""),
-                    "source":            source,
-                    "published_at":      published,
-                    "sentiment":         "neutral",
-                    "sentiment_score":   50,
-                    "impact":            "low",
-                    "tickers_affected":  [],
+                    "title":            title,
+                    "url":              entry.get("link", ""),
+                    "source":           source,
+                    "published_at":     published,
+                    "sentiment":        "neutral",
+                    "sentiment_score":  50,
+                    "impact":           "low",
+                    "tickers_affected": [],
                 })
                 count += 1
+
             log.info(f"  {source}: {count} articles")
         except Exception as e:
             log.error(f"  RSS error {source}: {e}")
+
     return records
 
 
