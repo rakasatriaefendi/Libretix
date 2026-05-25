@@ -7,6 +7,7 @@ import { formatCompactVolume, formatCurrency, getStockDetail, getStockHistory } 
 import type { OhlcvPoint, Period } from "@/lib/types";
 
 const periods: Period[] = ["1d", "5d", "1mo", "3mo", "1y"];
+const aggregateVolumePeriods: Period[] = ["1mo", "3mo", "1y"];
 
 function normalizeChartData(rows: OhlcvPoint[]): OhlcvPoint[] {
   return rows
@@ -30,7 +31,9 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
   const statOpen = firstBar?.open ?? null;
   const statHigh = chartData.length > 0 ? Math.max(...chartData.map((bar) => bar.high)) : null;
   const statLow = chartData.length > 0 ? Math.min(...chartData.map((bar) => bar.low)) : null;
-  const statVolume = lastBar?.volume ?? null;
+  const statVolume = aggregateVolumePeriods.includes(period)
+    ? chartData.reduce((total, bar) => total + Number(bar.volume ?? 0), 0)
+    : lastBar?.volume ?? null;
   const change = statOpen && statOpen > 0 ? detail.price - statOpen : 0;
   const changePct = statOpen && statOpen > 0 ? (change / statOpen) * 100 : 0;
   const positive = changePct >= 0;

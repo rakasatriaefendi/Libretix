@@ -7,10 +7,11 @@ import { formatCurrency } from "@/lib/api";
 import type { StockSummary } from "@/lib/types";
 
 export function StockCard({ stock }: { stock: StockSummary }) {
-  const change = Number.isFinite(stock.change) ? stock.change : (stock.price - Number(stock.open ?? stock.price));
-  const changePct = Number.isFinite(stock.change_pct) && stock.change_pct !== 0
-    ? stock.change_pct
-    : Number(stock.open && stock.open > 0 ? ((stock.price - stock.open) / stock.open) * 100 : 0);
+  const fallbackChange = stock.price - Number(stock.open ?? stock.price);
+  const fallbackChangePct = Number(stock.open && stock.open > 0 ? (fallbackChange / stock.open) * 100 : 0);
+  const staleZero = stock.change === 0 && stock.change_pct === 0 && Boolean(stock.open && stock.open > 0 && stock.price !== stock.open);
+  const change = Number.isFinite(stock.change) && !staleZero ? stock.change : fallbackChange;
+  const changePct = Number.isFinite(stock.change_pct) && !staleZero ? stock.change_pct : fallbackChangePct;
   const positive = changePct >= 0;
   return (
     <Link href={`/stock/${encodeURIComponent(stock.ticker)}`}>

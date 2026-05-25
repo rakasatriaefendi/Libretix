@@ -62,7 +62,14 @@ def _with_change(current: dict[str, Any], previous: dict[str, Any] | None = None
     price = _to_float(current.get("price"))
     previous_price = _to_float(previous.get("price")) if previous else None
     open_price = _to_float(current.get("open"))
-    basis_price = previous_price if previous_price and previous_price > 0 else open_price
+    basis_price = None
+
+    if previous_price and previous_price > 0 and price is not None and previous_price != price:
+        basis_price = previous_price
+    elif open_price and open_price > 0:
+        basis_price = open_price
+    elif previous_price and previous_price > 0:
+        basis_price = previous_price
 
     if price is None or not basis_price or basis_price <= 0:
         return {**current, "change": 0.0, "change_pct": 0.0}
@@ -79,7 +86,7 @@ def _with_change(current: dict[str, Any], previous: dict[str, Any] | None = None
 async def get_latest_stocks(
     market: Optional[str] = Query(None, description="Filter: 'US' atau 'IDX'")
 ):
-    cache_key = f"latest_stocks_v2:{market or 'all'}"
+    cache_key = f"latest_stocks_v3:{market or 'all'}"
     cached = _cache_get(cache_key)
     if cached:
         return cached
@@ -119,7 +126,7 @@ async def get_latest_stocks(
 @router.get("/{ticker}", response_model=StockResponse)
 async def get_stock(ticker: str):
     ticker = ticker.upper()
-    cache_key = f"stock:{ticker}"
+    cache_key = f"stock_v2:{ticker}"
     cached = _cache_get(cache_key)
     if cached:
         return cached
