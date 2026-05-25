@@ -20,13 +20,14 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# RSS feeds yang accessible dari server luar negeri (GitHub Actions)
 RSS_FEEDS = {
-    "Reuters Business":     "https://feeds.reuters.com/reuters/businessNews.rss",
-    "Yahoo Finance":        "https://finance.yahoo.com/rss/topstories",
-    "MarketWatch":          "https://feeds.content.dowjones.io/public/rss/mw_topstories",
-    "Seeking Alpha":        "https://seekingalpha.com/feed.xml",
-    "Investing.com":        "https://www.investing.com/rss/news.rss",
+    # Global (accessible dari GitHub Actions)
+    "Yahoo Finance":    "https://finance.yahoo.com/rss/topstories",
+    "MarketWatch":      "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+    "Seeking Alpha":    "https://seekingalpha.com/feed.xml",
+    "Investing.com":    "https://www.investing.com/rss/news.rss",
+    # Indonesia
+    "Katadata":         "https://katadata.co.id/rss",
 }
 
 
