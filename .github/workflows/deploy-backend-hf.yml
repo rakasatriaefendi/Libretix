@@ -1,0 +1,53 @@
+name: Deploy Backend to HF Spaces
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup git
+        run: |
+          git config --global user.email "ci@libretix.com"
+          git config --global user.name "Libretix CI"
+
+      - name: Prepare backend for HF Spaces
+        run: |
+          # Copy backend ke folder temp
+          cp -r backend /tmp/hf-backend
+          cd /tmp/hf-backend
+
+          # Fix imports: hapus prefix "backend."
+          sed -i 's/from backend\.db\./from db./g' routers/*.py
+          sed -i 's/from backend\.models\./from models./g' routers/*.py
+          sed -i 's/from backend\.routers\./from routers./g' main.py routers/*.py 2>/dev/null || true
+
+      - name: Deploy to HF Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # Clone HF Space
+          git clone https://rakabaebae:$HF_TOKEN@huggingface.co/spaces/rakabaebae/libretix-backend /tmp/hf-space
+
+          # Sync file backend ke HF Space (kecuali .git dan __pycache__)
+          rsync -av --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
+            /tmp/hf-backend/ /tmp/hf-space/
+
+          # Commit dan push
+          cd /tmp/hf-space
+          git add .
+          git diff --cached --quiet || git commit -m "deploy: sync backend from Libretix main"
+          git push https://rakabaebae:$HF_TOKEN@huggingface.co/spaces/rakabaebae/libretix-backend main
+
+      - name: Done
+        run: echo "Backend deployed to HF Spaces!"
