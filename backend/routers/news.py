@@ -12,13 +12,14 @@ async def get_news(
     sentiment: Optional[str] = Query(None, description="positive|negative|neutral"),
     source: Optional[str] = Query(None, description="Filter per sumber berita"),
     limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
 ):
     supabase = get_supabase()
     query = (
         supabase.table("news")
         .select("*")
         .order("published_at", desc=True)
-        .limit(limit)
+        .range(offset, offset + limit - 1)
     )
 
     if sentiment:
