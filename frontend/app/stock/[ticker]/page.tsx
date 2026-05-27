@@ -5,7 +5,7 @@ import { PredictionBadge, PredictionBadgeSkeleton } from "@/components/Predictio
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { formatCompactVolume, formatCurrency, getStockDetail, getStockHistory } from "@/lib/api";
+import { formatCompactVolume, formatCurrency, getStockDetail, getStockHistory, resolveDisplayChange } from "@/lib/api";
 import type { OhlcvPoint, Period } from "@/lib/types";
 
 const periods: Period[] = ["1d", "5d", "1mo", "3mo", "1y"];
@@ -25,20 +25,35 @@ function normalizeChartData(rows: OhlcvPoint[]): OhlcvPoint[] {
     .sort((a, b) => Number(a.time) - Number(b.time));
 }
 
+function getHistoryPreviousClose(rows: OhlcvPoint[], currentPrice: number) {
+  if (rows.length === 0) return null;
+  const lastBar = rows.at(-1);
+  const previousBar = rows.length > 1 ? rows[rows.length - 2] : null;
+  if (!lastBar) return null;
+  const matchesLastClose = Math.abs(lastBar.close - currentPrice) < 0.0001;
+  if (matchesLastClose && previousBar) return previousBar.close;
+  return lastBar.close;
+}
+
 async function StockDetailView({ ticker, period }: { ticker: string; period: Period }) {
   const [detail, history] = await Promise.all([getStockDetail(ticker), getStockHistory(ticker, period)]);
   const chartData = normalizeChartData(history);
   const firstBar = chartData[0];
   const lastBar = chartData.at(-1);
+  const historyPreviousClose = getHistoryPreviousClose(chartData, detail.price);
   const statOpen = firstBar?.open ?? null;
   const statHigh = chartData.length > 0 ? Math.max(...chartData.map((bar) => bar.high)) : null;
   const statLow = chartData.length > 0 ? Math.min(...chartData.map((bar) => bar.low)) : null;
   const statVolume = aggregateVolumePeriods.includes(period)
     ? chartData.reduce((total, bar) => total + Number(bar.volume ?? 0), 0)
     : lastBar?.volume ?? null;
-  const change = statOpen && statOpen > 0 ? detail.price - statOpen : 0;
-  const changePct = statOpen && statOpen > 0 ? (change / statOpen) * 100 : 0;
-  const positive = changePct >= 0;
+  const { change, changePct, positive } = resolveDisplayChange({
+    price: detail.price,
+    change: detail.change,
+    changePct: detail.change_pct,
+    previousClose: detail.previous_close ?? historyPreviousClose,
+    open: detail.open
+  });
   return (
     <div className="space-y-4">
       <Link href="/dashboard" className="inline-flex">
@@ -61,7 +76,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
               <div className="text-3xl font-semibold">{formatCurrency(detail.price, detail.market, ticker)}</div>
               <div className="text-sm">
                 {change >= 0 ? "+" : ""}
-                {change.toFixed(2)} ({changePct.toFixed(2)}%)
+                {formatCurrency(change, detail.market, ticker, { showSymbol: false })} ({changePct.toFixed(2)}%)
               </div>
             </div>
           </div>

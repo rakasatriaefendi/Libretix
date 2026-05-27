@@ -92,13 +92,44 @@ export function inferCurrency(market?: Market, ticker?: string) {
   return "$";
 }
 
-export function formatCurrency(value: number, market?: Market, ticker?: string) {
+export function formatCurrency(value: number, market?: Market, ticker?: string, options?: { showSymbol?: boolean }) {
   const currency = inferCurrency(market, ticker);
+  const showSymbol = options?.showSymbol ?? true;
   const formatted =
     currency === "IDR"
       ? new Intl.NumberFormat("id-ID", { minimumFractionDigits: value % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 }).format(value)
       : new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  if (!showSymbol) return formatted;
   return currency === "IDR" ? `IDR ${formatted}` : `$${formatted}`;
+}
+
+export function resolveDisplayChange({
+  price,
+  change,
+  changePct,
+  previousClose,
+  open
+}: {
+  price: number;
+  change?: number | null;
+  changePct?: number | null;
+  previousClose?: number | null;
+  open?: number | null;
+}) {
+  const apiChange = Number(change);
+  const apiChangePct = Number(changePct);
+  const hasApiChange = Number.isFinite(apiChange) && Number.isFinite(apiChangePct);
+  const baseline = previousClose ?? open ?? null;
+  const derivedChange = baseline && baseline > 0 ? price - baseline : 0;
+  const derivedChangePct = baseline && baseline > 0 ? (derivedChange / baseline) * 100 : 0;
+  const apiLooksStaleZero = hasApiChange && apiChange === 0 && apiChangePct === 0 && Boolean(baseline && baseline > 0 && price !== baseline);
+  const resolvedChange = hasApiChange && !apiLooksStaleZero ? apiChange : derivedChange;
+  const resolvedChangePct = hasApiChange && !apiLooksStaleZero ? apiChangePct : derivedChangePct;
+  return {
+    change: resolvedChange,
+    changePct: resolvedChangePct,
+    positive: resolvedChangePct >= 0
+  };
 }
 
 export function formatCompactVolume(value: number | null | undefined) {

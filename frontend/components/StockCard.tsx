@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/api";
+import { formatCurrency, resolveDisplayChange } from "@/lib/api";
 import type { StockSummary } from "@/lib/types";
 
 export function StockCard({ stock }: { stock: StockSummary }) {
-  const fallbackChange = stock.price - Number(stock.open ?? stock.price);
-  const fallbackChangePct = Number(stock.open && stock.open > 0 ? (fallbackChange / stock.open) * 100 : 0);
-  const staleZero = stock.change === 0 && stock.change_pct === 0 && Boolean(stock.open && stock.open > 0 && stock.price !== stock.open);
-  const change = Number.isFinite(stock.change) && !staleZero ? stock.change : fallbackChange;
-  const changePct = Number.isFinite(stock.change_pct) && !staleZero ? stock.change_pct : fallbackChangePct;
-  const positive = changePct >= 0;
+  const { change, changePct, positive } = resolveDisplayChange({
+    price: stock.price,
+    change: stock.change,
+    changePct: stock.change_pct,
+    open: stock.open
+  });
   return (
     <Link href={`/stock/${encodeURIComponent(stock.ticker)}`}>
       <Card className="transition hover:border-[#00d964]/40 hover:shadow-glow">
@@ -27,7 +27,7 @@ export function StockCard({ stock }: { stock: StockSummary }) {
               {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {changePct.toFixed(2)}%
             </div>
-            <div className="text-[11px] text-white/35">{change >= 0 ? "+" : ""}{change.toFixed(2)}</div>
+            <div className="text-[11px] text-white/35">{change >= 0 ? "+" : ""}{formatCurrency(change, stock.market, stock.ticker, { showSymbol: false })}</div>
           </div>
         </CardContent>
       </Card>
