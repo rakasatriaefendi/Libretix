@@ -27,10 +27,16 @@ jobs:
           cp -r backend /tmp/hf-backend
           cd /tmp/hf-backend
 
-          # Fix imports: hapus prefix "backend."
-          sed -i 's/from backend\.db\./from db./g' routers/*.py
-          sed -i 's/from backend\.models\./from models./g' routers/*.py
-          sed -i 's/from backend\.routers\./from routers./g' main.py routers/*.py 2>/dev/null || true
+          # Fix imports for flattened HF Space structure.
+          # All transformed files stay in /tmp only; source repo is untouched.
+          find . -name "*.py" -type f -print0 | while IFS= read -r -d '' file; do
+            sed -i 's/from backend\.db\./from db./g' "$file"
+            sed -i 's/from backend\.models\./from models./g' "$file"
+            sed -i 's/from backend\.routers\./from routers./g' "$file"
+            sed -i 's/import backend\.db\./import db./g' "$file"
+            sed -i 's/import backend\.models\./import models./g' "$file"
+            sed -i 's/import backend\.routers\./import routers./g' "$file"
+          done
 
       - name: Deploy to HF Spaces
         env:
