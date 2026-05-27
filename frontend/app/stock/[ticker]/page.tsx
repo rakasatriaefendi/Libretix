@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Chart } from "@/components/Chart";
+import { PredictionBadge, PredictionBadgeSkeleton } from "@/components/PredictionBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -101,6 +103,10 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
           ))}
         </CardContent>
       </Card>
+
+      <Suspense fallback={<PredictionBadgeSkeleton />}>
+        <PredictionBadge ticker={ticker} market={detail.market ?? "US"} />
+      </Suspense>
     </div>
   );
 }
