@@ -62,16 +62,29 @@ function ImpactDot({ impact }: { impact: string | null }) {
   return <span className={`inline-block h-1.5 w-1.5 rounded-full ${colors[impact as keyof typeof colors] ?? colors.low}`} />;
 }
 
+function formatPublishedAt(publishedAt: string) {
+  const publishedDate = new Date(publishedAt);
+  if (Number.isNaN(publishedDate.getTime())) return null;
+
+  const now = new Date();
+  const diffMs = now.getTime() - publishedDate.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMinutes < 1) return "just now";
+  if (diffHours < 1) return `${diffMinutes} minutes ago`;
+  if (diffDays < 1) return `${diffHours} hours ago`;
+  if (diffDays < 7) return `${diffDays} days ago`;
+
+  const day = String(publishedDate.getDate()).padStart(2, "0");
+  const month = publishedDate.toLocaleString("en-US", { month: "short" });
+  const year = publishedDate.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
 function NewsCard({ item }: { item: NewsItem }) {
-  const published = item.published_at
-    ? new Date(item.published_at).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
+  const published = item.published_at ? formatPublishedAt(item.published_at) : null;
 
   return (
     <a
@@ -116,12 +129,12 @@ function NewsCard({ item }: { item: NewsItem }) {
   );
 }
 
-function StatBar({ label, value, pct, color }: { label: string; value: number; pct: number; color: string }) {
+function StatBar({ label, value, pct, color, barColor }: { label: string; value: number; pct: number; color: string; barColor: string }) {
   return (
     <div className="flex items-center gap-3">
       <span className={`w-16 text-xs font-medium ${color}`}>{label}</span>
       <div className="h-1.5 flex-1 rounded-full bg-white/10">
-        <div className={`h-full rounded-full ${color.replace("text-", "bg-")}`} style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.max(pct, 0.5)}%` }} />
       </div>
       <span className="w-12 text-right text-xs text-white/40">{value} ({pct}%)</span>
     </div>
@@ -187,9 +200,9 @@ export function NewsClient({
         <div className="rounded-xl border border-white/10 bg-[#111111] p-4">
           <h2 className="mb-3 text-xs font-semibold tracking-[0.2em] text-[#00d964]">MARKET SENTIMENT</h2>
           <div className="space-y-2">
-            <StatBar label="Positive" value={stats.positive} pct={stats.positive_pct} color="text-emerald-400" />
-            <StatBar label="Negative" value={stats.negative} pct={stats.negative_pct} color="text-rose-400" />
-            <StatBar label="Neutral" value={stats.neutral} pct={stats.neutral_pct} color="text-white/40" />
+            <StatBar label="Positive" value={stats.positive} pct={stats.positive_pct} color="text-emerald-400" barColor="bg-emerald-400" />
+            <StatBar label="Negative" value={stats.negative} pct={stats.negative_pct} color="text-rose-400" barColor="bg-rose-400" />
+            <StatBar label="Neutral" value={stats.neutral} pct={stats.neutral_pct} color="text-white/40" barColor="bg-white/30" />
           </div>
         </div>
       )}
