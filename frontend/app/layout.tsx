@@ -7,11 +7,14 @@ import "./globals.css";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { RealTimeClock } from "@/components/RealTimeClock";
+import { useUiStore } from "@/lib/store";
 import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const search = useUiStore((state) => state.search);
+  const setSearch = useUiStore((state) => state.setSearch);
 
   return (
     <html lang="en">
@@ -82,7 +85,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {pathname === "/dashboard" && (
                     <div className="relative w-full max-w-md">
                       <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/35" size={16} />
-                      <Input className="pl-9" placeholder="Search ticker..." aria-label="Search ticker" />
+                      <Input
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        className="pl-9"
+                        placeholder="Search ticker..."
+                        aria-label="Search ticker"
+                      />
                     </div>
                   )}
                 </div>

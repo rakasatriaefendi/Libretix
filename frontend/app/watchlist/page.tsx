@@ -1,8 +1,16 @@
-export default function WatchlistPage() {
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#111111]/90 p-6">
-      <h1 className="text-2xl font-semibold">Watchlist</h1>
-      <p className="mt-2 text-sm text-white/45">Watchlist scaffolding will live here in the next phase.</p>
-    </div>
-  );
+import { WatchlistClient } from "@/components/WatchlistClient";
+import { getLatestStocks } from "@/lib/api";
+import type { Market, StockSummary } from "@/lib/types";
+
+const markets: Market[] = ["US", "IDX", "CRYPTO"];
+
+export default async function WatchlistPage() {
+  const results = await Promise.allSettled(markets.map((market) => getLatestStocks(market)));
+  const stocks = markets.flatMap((market, index) => {
+    const result = results[index];
+    if (result.status !== "fulfilled") return [];
+    return result.value.map((stock: StockSummary) => ({ ...stock, market }));
+  });
+
+  return <WatchlistClient stocks={stocks} />;
 }

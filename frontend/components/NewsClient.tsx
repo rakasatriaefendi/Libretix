@@ -153,8 +153,26 @@ export function NewsClient({
   const [visibleCount, setVisibleCount] = useState(20);
   const [isFocused, setIsFocused] = useState(false);
   const [selectedSentiment, setSelectedSentiment] = useState<string | undefined>(undefined);
+  const [tickerQuery, setTickerQuery] = useState("");
+  const [selectedTicker, setSelectedTicker] = useState<string | undefined>(undefined);
 
   const normalizedQuery = query.trim().toLowerCase();
+  const availableTickers = useMemo(() => {
+    const tickerCounts = new Map<string, number>();
+    news.forEach((item) => {
+      item.tickers_affected?.forEach((ticker) => {
+        tickerCounts.set(ticker, (tickerCounts.get(ticker) ?? 0) + 1);
+      });
+    });
+    return [...tickerCounts.entries()]
+      .sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0]))
+      .map(([ticker]) => ticker);
+  }, [news]);
+  const tickerSuggestions = useMemo(() => {
+    const normalizedTickerQuery = tickerQuery.trim().toUpperCase();
+    if (!normalizedTickerQuery) return availableTickers.slice(0, 10);
+    return availableTickers.filter((ticker) => ticker.includes(normalizedTickerQuery)).slice(0, 10);
+  }, [availableTickers, tickerQuery]);
   const suggestions = useMemo(() => {
     if (!normalizedQuery) return [];
     return news
@@ -167,23 +185,42 @@ export function NewsClient({
     return news.filter((item) => {
       const matchesSearch = !term || item.title.toLowerCase().includes(term);
       const matchesSentiment = !selectedSentiment || item.sentiment === selectedSentiment;
-      return matchesSearch && matchesSentiment;
+      const matchesTicker = !selectedTicker || (item.tickers_affected ?? []).includes(selectedTicker);
+      return matchesSearch && matchesSentiment && matchesTicker;
     });
-  }, [news, submittedQuery, selectedSentiment]);
+  }, [news, selectedSentiment, selectedTicker, submittedQuery]);
 
   const visibleNews = filteredNews.slice(0, visibleCount);
   const hasMore = visibleCount < filteredNews.length;
 
-  function resetSearch() {
+  function clearTextSearch() {
     setQuery("");
     setSubmittedQuery("");
     setVisibleCount(20);
-    setSelectedSentiment(undefined);
   }
 
   function submitSearch() {
     const next = query.trim();
     setSubmittedQuery(next);
+    setVisibleCount(20);
+  }
+
+  function applyTickerFilter(value: string) {
+    const normalizedTicker = value.trim().toUpperCase();
+    if (!normalizedTicker) {
+      setSelectedTicker(undefined);
+      setTickerQuery("");
+      setVisibleCount(20);
+      return;
+    }
+
+    const matchedTicker =
+      availableTickers.find((ticker) => ticker === normalizedTicker) ??
+      availableTickers.find((ticker) => ticker.startsWith(normalizedTicker)) ??
+      availableTickers.find((ticker) => ticker.includes(normalizedTicker));
+
+    setSelectedTicker(matchedTicker ?? normalizedTicker);
+    setTickerQuery(matchedTicker ?? normalizedTicker);
     setVisibleCount(20);
   }
 
@@ -214,7 +251,7 @@ export function NewsClient({
             const value = event.target.value;
             setQuery(value);
             if (!value.trim()) {
-              resetSearch();
+              clearTextSearch();
             } else {
               setVisibleCount(20);
             }
@@ -224,7 +261,10 @@ export function NewsClient({
               submitSearch();
             }
             if (event.key === "Escape") {
-              resetSearch();
+              clearTextSearch();
+              setTickerQuery("");
+              setSelectedTicker(undefined);
+              setSelectedSentiment(undefined);
             }
           }}
           onFocus={() => setIsFocused(true)}
@@ -260,6 +300,54 @@ export function NewsClient({
         )}
       </div>
 
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={tickerQuery}
+            onChange={(event) => setTickerQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                applyTickerFilter(tickerQuery);
+              }
+            }}
+            placeholder="Filter by ticker..."
+            className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#00d964]/40"
+          />
+          <button
+            type="button"
+            onClick={() => applyTickerFilter(tickerQuery)}
+            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/20 hover:text-white"
+          >
+            Apply Ticker
+          </button>
+          {selectedTicker && (
+            <button
+              type="button"
+              onClick={() => applyTickerFilter("")}
+              className="rounded-lg border border-[#00d964]/40 bg-[#00d964]/10 px-3 py-1.5 text-xs font-medium text-[#00d964]"
+            >
+              {selectedTicker} x
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {tickerSuggestions.map((ticker) => (
+            <button
+              key={ticker}
+              type="button"
+              onClick={() => applyTickerFilter(ticker)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                selectedTicker === ticker
+                  ? "border-[#00d964]/50 bg-[#00d964]/10 text-[#00d964]"
+                  : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/80"
+              }`}
+            >
+              {ticker}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-wrap gap-2">
         {[
           { label: "All", value: undefined },
@@ -272,8 +360,7 @@ export function NewsClient({
             type="button"
             onClick={() => {
               setSelectedSentiment(f.value);
-              setQuery("");
-              setSubmittedQuery("");
+              clearTextSearch();
               setVisibleCount(20);
             }}
             className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${

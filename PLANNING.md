@@ -133,22 +133,22 @@ Divisi 4 — News & Sentiment→ Gemini / GPT-4o Mini
 ## 🗓️ Timeline & Fase Pengerjaan
 
 ### Phase 1 — Foundation (Minggu 1-2)
-- [ ] Setup repo & struktur folder
-- [ ] Scraper saham AS + IDX (yfinance)
-- [ ] GitHub Actions scrape tiap jam → simpan ke Supabase
-- [ ] API endpoint basic (get stock data, get history)
+- [x] Setup repo & struktur folder
+- [x] Scraper saham AS + IDX (yfinance)
+- [x] GitHub Actions scrape tiap jam → simpan ke Supabase
+- [x] API endpoint basic (get stock data, get history)
 
 ### Phase 2 — Frontend Basic (Minggu 3-4)
-- [ ] Dashboard layout
-- [ ] Watchlist + search saham
-- [ ] Chart candlestick (TradingView Lightweight Charts)
-- [ ] Deploy frontend ke Vercel
+- [x] Dashboard layout
+- [x] Watchlist + search saham
+- [x] Chart candlestick (TradingView Lightweight Charts)
+- [x] Deploy frontend ke Vercel
 
 ### Phase 3 — News & Sentiment (Minggu 5-6)
-- [ ] Scraper berita (NewsAPI + RSS)
-- [ ] Sentiment analysis tiap artikel
-- [ ] Halaman berita + filter per ticker
-- [ ] Mapping berita → saham terpengaruh
+- [x] Scraper berita (NewsAPI + RSS)
+- [x] Sentiment analysis tiap artikel
+- [x] Halaman berita + filter per ticker
+- [x] Mapping berita → saham terpengaruh
 
 ### Phase 4 — ML Prediction (Minggu 7-8)
 - [ ] Model Prophet untuk prediksi trend

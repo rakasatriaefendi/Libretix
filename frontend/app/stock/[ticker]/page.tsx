@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Chart } from "@/components/Chart";
 import { PredictionBadge, PredictionBadgeSkeleton } from "@/components/PredictionBadge";
+import { WatchlistToggleButton } from "@/components/WatchlistToggleButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -71,6 +72,9 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
                 <Badge className="border-[#00d964]/30 text-[#00d964]">{period}</Badge>
               </div>
               <p className="text-sm text-white/45">{detail.name ?? "Market detail"}</p>
+              <div className="mt-3">
+                <WatchlistToggleButton ticker={detail.ticker} />
+              </div>
             </div>
             <div className={positive ? "text-right text-emerald-400" : "text-right text-rose-400"}>
               <div className="text-3xl font-semibold">{formatCurrency(detail.price, detail.market, ticker)}</div>
