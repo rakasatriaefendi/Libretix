@@ -23,7 +23,12 @@ jobs:
         run: pip install -r ml_service/requirements-predict.txt
 
       - name: Install CmdStan
-        run: python -c "import cmdstanpy; cmdstanpy.install_cmdstan(cores=2)"
+        run: |
+          python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.33.1', cores=2)"
+          echo "CMDSTAN=$HOME/.cmdstan/cmdstan-2.33.1" >> $GITHUB_ENV
+
+      - name: Verify CmdStan
+        run: python -c "from cmdstanpy import cmdstan_path; print(cmdstan_path())"
 
       - name: Run ML predictions
         env:

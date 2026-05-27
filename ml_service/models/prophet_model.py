@@ -84,6 +84,7 @@ def run_prophet(df: pd.DataFrame, ticker: str, market: str) -> pd.DataFrame | No
                 yearly_seasonality=True,
                 interval_width=0.8,
                 changepoint_prior_scale=0.1,
+                stan_backend="CMDSTANPY",
             )
         elif market == "IDX":
             model = Prophet(
@@ -92,6 +93,7 @@ def run_prophet(df: pd.DataFrame, ticker: str, market: str) -> pd.DataFrame | No
                 yearly_seasonality=True,
                 interval_width=0.8,
                 changepoint_prior_scale=0.05,
+                stan_backend="CMDSTANPY",
             )
         else:  # US stocks
             model = Prophet(
@@ -100,6 +102,7 @@ def run_prophet(df: pd.DataFrame, ticker: str, market: str) -> pd.DataFrame | No
                 yearly_seasonality=True,
                 interval_width=0.8,
                 changepoint_prior_scale=0.05,
+                stan_backend="CMDSTANPY",
             )
 
         model.fit(df)

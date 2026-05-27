@@ -201,8 +201,11 @@ async def get_predictions(ticker: str):
     ticker = ticker.upper()
     cache_key = f"predict:{ticker}"
     cached = _cache_get(cache_key)
+    today = datetime.utcnow().date().isoformat()
     if cached:
-        return cached
+        filtered_cached = [row for row in cached if str(row.get("prediction_date", "")) > today]
+        if filtered_cached:
+            return filtered_cached
 
     supabase = get_supabase()
     result = (
@@ -214,8 +217,10 @@ async def get_predictions(ticker: str):
         .execute()
     )
 
-    if not result.data:
+    filtered_data = [row for row in result.data if str(row.get("prediction_date", "")) > today]
+
+    if not filtered_data:
         raise HTTPException(status_code=404, detail=f"No predictions for {ticker}")
 
-    _cache_set(cache_key, result.data, ttl=3600)
-    return result.data
+    _cache_set(cache_key, filtered_data, ttl=3600)
+    return filtered_data

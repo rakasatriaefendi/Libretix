@@ -17,6 +17,10 @@ function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat("en-US", { day: "2-digit", month: "short", year: "numeric" }).format(date);
 }
 
+function isFutureDate(value: string) {
+  return value > new Date().toISOString().slice(0, 10);
+}
+
 export function PredictionBadgeSkeleton() {
   return (
     <Card className="animate-pulse border-white/10 bg-[#111111]">
@@ -45,7 +49,7 @@ export async function PredictionBadge({ ticker, market }: { ticker: string; mark
     if (predictionResponse.status === 404) return <UnavailableCard />;
     if (!predictionResponse.ok) throw new Error("Prediction request failed");
 
-    const predictions = (await predictionResponse.json()) as PredictionItem[];
+    const predictions = ((await predictionResponse.json()) as PredictionItem[]).filter((row) => isFutureDate(row.prediction_date));
     if (!predictions.length) return <UnavailableCard />;
 
     return (
