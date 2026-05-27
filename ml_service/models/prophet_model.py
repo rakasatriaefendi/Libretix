@@ -194,6 +194,9 @@ def main():
                 total_failed += 1
 
     log.info(f"\n=== Done. {total_success} success, {total_failed} failed ===")
+    if total_success == 0:
+        log.error("Semua prediksi gagal diproses.")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
