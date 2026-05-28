@@ -142,7 +142,7 @@ export async function addWatchlistTicker(token: string, ticker: string): Promise
 }
 
 export async function removeWatchlistTicker(token: string, ticker: string): Promise<void> {
-  await authorizedRequest<void>(`/watchlist/${encodeURIComponent(ticker)}`, token, {
+  await authorizedRequest<void>(`/watchlist/${encodeURIComponent(ticker)}/`, token, {
     method: "DELETE"
   });
 }
