@@ -126,8 +126,12 @@ function isFuturePredictionDate(value: string) {
 }
 
 export async function getStockPredictions(ticker: string): Promise<StockPrediction[]> {
-  const payload = await request<StockPrediction[]>(`/stocks/${encodeURIComponent(ticker)}/predict`);
-  return payload.filter((row) => isFuturePredictionDate(row.prediction_date));
+  try {
+    const payload = await request<StockPrediction[]>(`/stocks/${encodeURIComponent(ticker)}/predict`);
+    return payload.filter((row) => isFuturePredictionDate(row.prediction_date));
+  } catch {
+    return [];
+  }
 }
 
 export async function getWatchlist(token: string): Promise<WatchlistItem[]> {
