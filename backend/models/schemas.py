@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional
 
@@ -53,6 +53,8 @@ class NewsItem(BaseModel):
 
 
 class Prediction(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
     ticker: str
     predicted_price: float
     confidence_low: float

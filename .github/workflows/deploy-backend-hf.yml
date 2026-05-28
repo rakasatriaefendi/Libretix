@@ -30,11 +30,17 @@ jobs:
           # Fix imports for flattened HF Space structure.
           # All transformed files stay in /tmp only; source repo is untouched.
           find . -name "*.py" -type f -print0 | while IFS= read -r -d '' file; do
+            sed -i 's/from backend\.db import /from db import /g' "$file"
             sed -i 's/from backend\.db\./from db./g' "$file"
+            sed -i 's/from backend\.models import /from models import /g' "$file"
             sed -i 's/from backend\.models\./from models./g' "$file"
+            sed -i 's/from backend\.routers import /from routers import /g' "$file"
             sed -i 's/from backend\.routers\./from routers./g' "$file"
+            sed -i 's/import backend\.db/import db/g' "$file"
             sed -i 's/import backend\.db\./import db./g' "$file"
+            sed -i 's/import backend\.models/import models/g' "$file"
             sed -i 's/import backend\.models\./import models./g' "$file"
+            sed -i 's/import backend\.routers/import routers/g' "$file"
             sed -i 's/import backend\.routers\./import routers./g' "$file"
           done
 
@@ -46,7 +52,7 @@ jobs:
           git clone https://rakabaebae:$HF_TOKEN@huggingface.co/spaces/rakabaebae/libretix-backend /tmp/hf-space
 
           # Sync file backend ke HF Space (kecuali .git dan __pycache__)
-          rsync -av --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
+          rsync -av --delete --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
             /tmp/hf-backend/ /tmp/hf-space/
 
           # Commit dan push

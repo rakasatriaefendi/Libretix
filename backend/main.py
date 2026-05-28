@@ -4,8 +4,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from backend.routers import stocks, news, forex, watchlist
 from backend.models.schemas import HealthResponse
+from backend.routers.forex import router as forex_router
+from backend.routers.news import router as news_router
+from backend.routers.stocks import router as stocks_router
+from backend.routers.watchlist import router as watchlist_router
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -26,10 +29,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(stocks.router)
-app.include_router(news.router)
-app.include_router(forex.router)
-app.include_router(watchlist.router)
+app.include_router(stocks_router)
+app.include_router(news_router)
+app.include_router(forex_router)
+app.include_router(watchlist_router)
 
 
 @app.get("/", response_model=HealthResponse)

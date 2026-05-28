@@ -1,5 +1,14 @@
 import { AuthForm } from "@/components/AuthForm";
 
-export default function RegisterPage() {
-  return <AuthForm mode="register" />;
+type AuthPageProps = {
+  searchParams?: {
+    redirect?: string | string[];
+  };
+};
+
+export default function RegisterPage({ searchParams }: AuthPageProps) {
+  const redirectParam = searchParams?.redirect;
+  const redirectTo = Array.isArray(redirectParam) ? redirectParam[0] : redirectParam;
+
+  return <AuthForm mode="register" redirectTo={redirectTo} />;
 }

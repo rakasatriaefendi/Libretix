@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { addWatchlistTicker, removeWatchlistTicker } from "@/lib/api";
 import { useAuthStore, useWatchlistStore } from "@/lib/store";
 
 export function useWatchlistActions() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const session = useAuthStore((state) => state.session);
   const authLoading = useAuthStore((state) => state.loading);
   const tickers = useWatchlistStore((state) => state.tickers);
@@ -26,7 +25,7 @@ export function useWatchlistActions() {
     if (!session?.access_token) {
       setLocalTicker(ticker, !saved);
       if (!saved) {
-        const currentQuery = searchParams.toString();
+        const currentQuery = typeof window !== "undefined" ? window.location.search.slice(1) : "";
         const redirectTarget = currentQuery ? `${pathname}?${currentQuery}` : pathname;
         router.push(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
       }

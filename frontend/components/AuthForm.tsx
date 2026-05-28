@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { useAuthStore } from "@/lib/store";
 
-export function AuthForm({ mode }: { mode: "login" | "register" }) {
-  const searchParams = useSearchParams();
+export function AuthForm({
+  mode,
+  redirectTo: redirectToProp
+}: {
+  mode: "login" | "register";
+  redirectTo?: string;
+}) {
   const user = useAuthStore((state) => state.user);
   const authLoading = useAuthStore((state) => state.loading);
   const [email, setEmail] = useState("");
@@ -19,7 +23,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const redirectTo = useMemo(() => searchParams.get("redirect") ?? "/watchlist", [searchParams]);
+  const redirectTo = useMemo(() => redirectToProp?.trim() || "/watchlist", [redirectToProp]);
 
   useEffect(() => {
     if (!authLoading && user) {
