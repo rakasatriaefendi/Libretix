@@ -1,14 +1,13 @@
 -- ============================================================
--- Libretix OSS — Supabase Schema
--- Run ini di Supabase SQL Editor:
+-- Libretix OSS - Supabase Schema
+-- Run this in Supabase SQL Editor:
 -- https://app.supabase.com/project/_/sql
 -- ============================================================
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- -------------------------------------------------------
--- Tabel: stock_prices
+-- Table: stock_prices
 -- -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS stock_prices (
   id        UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -19,39 +18,37 @@ CREATE TABLE IF NOT EXISTS stock_prices (
   low       DECIMAL(12,4),
   volume    BIGINT,
   market    VARCHAR(10),  -- 'US', 'IDX', 'CRYPTO'
-  timestamp TIMESTAMPTZ  DEFAULT NOW()
+  timestamp TIMESTAMPTZ   DEFAULT NOW()
 );
 
--- Index untuk query cepat
 CREATE INDEX IF NOT EXISTS idx_stock_ticker ON stock_prices(ticker);
 CREATE INDEX IF NOT EXISTS idx_stock_timestamp ON stock_prices(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_stock_market ON stock_prices(market);
 
 -- -------------------------------------------------------
--- Tabel: news
+-- Table: news
 -- -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS news (
-  id              UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  title           TEXT        NOT NULL,
-  url             TEXT,
-  source          VARCHAR(100),
-  summary_id      TEXT,
-  summary_en      TEXT,
-  sentiment       VARCHAR(10),       -- positive|negative|neutral
-  sentiment_score INT,               -- 0-100
-  impact          VARCHAR(10),       -- high|medium|low
-  tickers_affected TEXT[],           -- array of tickers
-  published_at    TIMESTAMPTZ,
-  created_at      TIMESTAMPTZ DEFAULT NOW()
+  id               UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  title            TEXT        NOT NULL,
+  url              TEXT,
+  source           VARCHAR(100),
+  summary_id       TEXT,
+  summary_en       TEXT,
+  sentiment        VARCHAR(10),  -- positive|negative|neutral
+  sentiment_score  INT,          -- 0-100
+  impact           VARCHAR(10),  -- high|medium|low
+  tickers_affected TEXT[],
+  published_at     TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_news_published ON news(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_news_sentiment ON news(sentiment);
--- GIN index untuk array search
 CREATE INDEX IF NOT EXISTS idx_news_tickers ON news USING GIN(tickers_affected);
 
 -- -------------------------------------------------------
--- Tabel: predictions
+-- Table: predictions
 -- -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS predictions (
   id               UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -68,7 +65,7 @@ CREATE INDEX IF NOT EXISTS idx_pred_ticker ON predictions(ticker);
 CREATE INDEX IF NOT EXISTS idx_pred_date ON predictions(prediction_date);
 
 -- -------------------------------------------------------
--- Tabel: watchlists (Phase 5, sudah disiapkan)
+-- Table: watchlists
 -- -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS watchlists (
   id       UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -81,7 +78,25 @@ CREATE TABLE IF NOT EXISTS watchlists (
 CREATE INDEX IF NOT EXISTS idx_watchlist_user ON watchlists(user_id);
 
 -- -------------------------------------------------------
--- Row Level Security (RLS) — untuk watchlists
+-- Table: price_alerts
+-- -------------------------------------------------------
+CREATE TABLE IF NOT EXISTS price_alerts (
+  id            UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id       UUID        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  ticker        TEXT        NOT NULL,
+  target_price  NUMERIC     NOT NULL,
+  condition     TEXT        NOT NULL CHECK (condition IN ('above', 'below')),
+  is_triggered  BOOLEAN     DEFAULT FALSE,
+  triggered_at  TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_alerts_ticker ON price_alerts(ticker);
+CREATE INDEX IF NOT EXISTS idx_price_alerts_user ON price_alerts(user_id);
+CREATE INDEX IF NOT EXISTS idx_price_alerts_triggered ON price_alerts(is_triggered);
+
+-- -------------------------------------------------------
+-- Row Level Security
 -- -------------------------------------------------------
 ALTER TABLE watchlists ENABLE ROW LEVEL SECURITY;
 
@@ -90,7 +105,14 @@ CREATE POLICY "Users can manage own watchlist"
   FOR ALL
   USING (auth.uid() = user_id);
 
--- stock_prices & news bisa dibaca semua orang (public read)
+ALTER TABLE price_alerts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own alerts"
+  ON price_alerts
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 ALTER TABLE stock_prices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read stock_prices"
   ON stock_prices FOR SELECT USING (true);
@@ -104,8 +126,7 @@ CREATE POLICY "Public read predictions"
   ON predictions FOR SELECT USING (true);
 
 -- -------------------------------------------------------
--- Function: cleanup data lama (jalankan manual atau cron)
--- Hapus stock_prices > 90 hari untuk hemat storage
+-- Cleanup helper
 -- -------------------------------------------------------
 CREATE OR REPLACE FUNCTION cleanup_old_stock_prices()
 RETURNS void AS $$

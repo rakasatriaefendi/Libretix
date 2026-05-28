@@ -25,8 +25,10 @@ function normalizeApiBaseUrl(value: string) {
 function getApiUrl(path: string) {
   if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL is not set");
   const base = normalizeApiBaseUrl(API_URL);
+  const parsedBase = new URL(base);
+  const isLocalhost = parsedBase.hostname === "localhost" || parsedBase.hostname === "127.0.0.1";
   const [pathname, search] = path.split("?");
-  const normalizedPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const normalizedPath = !isLocalhost && !pathname.endsWith("/") ? `${pathname}/` : pathname;
   const fullPath = search ? `${normalizedPath}?${search}` : normalizedPath;
   return new URL(fullPath, base).toString();
 }

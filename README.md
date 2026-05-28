@@ -1,69 +1,94 @@
-# 🏦 Libretix — Open Source Edition
+# Libretix
 
-Real-time stock market dashboard for US & Indonesian markets with financial news, sentiment analysis, and machine learning forecasting.
+Real-time market dashboard for US stocks, IDX stocks, and crypto with:
+- live market snapshots
+- chart-based historical views
+- financial news and sentiment
+- Prophet price prediction overlay
+- personal watchlist
+- one-shot email price alerts
 
-Built with a modern AI-assisted engineering workflow, fully open source, and automated using GitHub Actions.
-
----
-
-## 🧠 AI-Assisted Development Workflow
-
-Libretix is developed using a structured **Multi-AI Engineering Workflow** inspired by how modern software teams are beginning to integrate AI into real development pipelines.
-
-Instead of relying on a single AI model for everything, this project experiments with role-based AI orchestration where each model is used according to its strengths.
-
-### AI Roles in This Project
-
-* **Claude — System Orchestrator & Architecture Reviewer**
-
-  * High-level architecture planning
-  * Cross-service integration review
-  * Workflow orchestration
-  * Engineering consistency checks
-  * Debugging & system planning
-
-* **Gemini & GPT Models — Development Assistants**
-
-  * Frontend implementation support
-  * Boilerplate generation
-  * UI component scaffolding
-  * Structured coding tasks
-  * Refactoring assistance
-
-* **Mistral / Cohere — Planned ML Forecasting Assistant**
-
-  * Lightweight forecasting experimentation
-  * CPU-friendly ML pipelines
-  * Time-series prediction workflows
-  * Financial forecasting research
-
-This approach is intentionally designed to simulate modern AI-assisted software engineering practices where:
-
-* architecture and orchestration remain controlled,
-* implementation tasks are delegated efficiently,
-* and human validation remains mandatory.
-
-All generated code still goes through:
-
-* manual review,
-* local testing,
-* debugging,
-* and validation before integration.
+Libretix is built as a monitoring and research product, not a brokerage or trading execution platform.
 
 ---
 
-## 🚀 Quick Start — Phase 1
+## Current Highlights
+
+- Next.js 14 frontend deployed on Vercel
+- FastAPI backend deployed on Hugging Face Spaces
+- Supabase Auth + cloud watchlist
+- Gemini-powered news sentiment analysis
+- Prophet batch prediction pipeline via GitHub Actions
+- Resend-based one-shot price alerts
+- Dark/light mode
+
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js 14 App Router
+- Tailwind CSS
+- Zustand
+- TradingView Lightweight Charts
+
+### Backend
+- FastAPI
+- Supabase PostgreSQL
+- Upstash Redis
+- Hugging Face Spaces (Docker)
+
+### ML and Sentiment
+- Prophet for batch forecasting
+- Gemini API via Google AI Studio for sentiment analysis
+
+### Automation
+- GitHub Actions for scraping, predictions, alerts, cleanup, and backend deploy
+
+---
+
+## Active Features
+
+- Dashboard for US, IDX, and crypto
+- Stock detail page with:
+  - candlestick chart
+  - Prophet prediction overlay
+  - watchlist toggle
+  - price alerts
+- News page with:
+  - sentiment summary
+  - search
+  - filter by sentiment
+  - filter by ticker
+- Personal cloud watchlist
+- One-shot email alerts
+- Dark/light theme toggle
+
+---
+
+## Features Not Yet Active
+
+- LSTM or other sequence-based prediction model
+- Separate real-time ML inference service
+- Forex product surface in frontend
+- Macro / FRED dashboard
+
+The backend still contains some prepared endpoints or planned environment keys for future expansion, but those parts are not currently a live user-facing feature.
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
-* Python 3.11+
-* Node.js 18+
-* Free Supabase account
-* Free Upstash account (Redis)
+- Python 3.11+
+- Node.js 18+
+- Supabase project
+- Upstash Redis account
 
 ---
 
-## Step 1 — Clone Repository
+## 1. Clone repository
 
 ```bash
 git clone https://github.com/USERNAME/Libretix
@@ -72,34 +97,40 @@ cd Libretix
 
 ---
 
-## Step 2 — Setup Supabase Database
+## 2. Setup Supabase
 
-1. Open Supabase dashboard
-2. Create a new project
-3. Open **SQL Editor**
-4. Run:
+Run the schema in:
 
-```bash
+```text
 backend/db/schema.sql
 ```
 
-5. Save these credentials:
+If your database was created before the alert feature, make sure the `price_alerts` table is also added.
 
-* `SUPABASE_URL`
-* `SUPABASE_SERVICE_KEY`
-* `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+You will need:
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ---
 
-## Step 3 — Setup Backend
+## 3. Backend local setup
 
 ```bash
 cd backend
-
 cp .env.example .env
+pip install -r requirements.txt
+uvicorn backend.main:app --reload --port 8000
 ```
 
-Fill `.env`:
+Local backend:
+
+```text
+http://localhost:8000
+http://localhost:8000/docs
+```
+
+### Backend `.env`
 
 ```env
 SUPABASE_URL=
@@ -107,236 +138,211 @@ SUPABASE_SERVICE_KEY=
 UPSTASH_REDIS_URL=
 UPSTASH_REDIS_TOKEN=
 NEWS_API_KEY=
+FRED_API_KEY=
 EXCHANGE_RATE_API_KEY=
 ```
 
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run backend:
-
-```bash
-uvicorn backend.main:app --reload --port 8000
-```
-
-API:
-
-```bash
-http://localhost:8000
-```
-
-Swagger Docs:
-
-```bash
-http://localhost:8000/docs
-```
+Notes:
+- `FRED_API_KEY` and `EXCHANGE_RATE_API_KEY` are currently optional for future features
+- they are documented because the project has planned expansion in those areas
 
 ---
 
-## Step 4 — Test Stock Scraper
-
-```bash
-python -m scraper.stocks
-```
-
-Verify data inside Supabase table:
-
-```bash
-stock_prices
-```
-
----
-
-## Step 5 — Setup GitHub Actions
-
-Inside your GitHub repository:
-
-`Settings → Secrets and variables → Actions`
-
-Add these secrets:
-
-| Secret Name             | Description           |
-| ----------------------- | --------------------- |
-| `SUPABASE_URL`          | Supabase project URL  |
-| `SUPABASE_SERVICE_KEY`  | Supabase service key  |
-| `NEWS_API_KEY`          | NewsAPI key           |
-| `EXCHANGE_RATE_API_KEY` | Exchange rate API key |
-| `UPSTASH_REDIS_URL`     | Redis URL             |
-| `UPSTASH_REDIS_TOKEN`   | Redis token           |
-
-GitHub Actions will automatically:
-
-* scrape stock data hourly,
-* collect financial news,
-* run ML prediction jobs,
-* and maintain automated workflows.
-
----
-
-## Step 6 — Setup Frontend (Phase 2)
+## 4. Frontend local setup
 
 ```bash
 cd frontend
-
 cp .env.example .env.local
-```
-
-Fill:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Run frontend:
-
-```bash
 npm run dev
 ```
 
 Frontend:
 
-```bash
+```text
 http://localhost:3000
 ```
 
----
+### Frontend `.env.local`
 
-# 📡 API Endpoints
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-| Method | Endpoint                              | Description              |
-| ------ | ------------------------------------- | ------------------------ |
-| GET    | `/`                                   | Health check             |
-| GET    | `/stocks/latest`                      | Latest stock prices      |
-| GET    | `/stocks/latest?market=US`            | Filter US / IDX / CRYPTO |
-| GET    | `/stocks/{ticker}`                    | Single stock detail      |
-| GET    | `/stocks/{ticker}/history?period=1mo` | Historical stock data    |
-| GET    | `/stocks/{ticker}/predict`            | ML prediction            |
-| GET    | `/news/`                              | Latest financial news    |
-| GET    | `/news/?ticker=BBCA.JK`               | News by ticker           |
-| GET    | `/forex/rates`                        | Exchange rate data       |
-| GET    | `/watchlist/`                         | Current user watchlist   |
-| POST   | `/watchlist/`                         | Add ticker to watchlist  |
-| DELETE | `/watchlist/{ticker}/`                | Remove ticker from watchlist |
-| GET    | `/alerts/`                            | Active user price alerts |
-| POST   | `/alerts/`                            | Create price alert       |
-| DELETE | `/alerts/{alert_id}/`                 | Delete price alert       |
+Note:
+- local development should use plain `http://localhost:8000`
+- production requests are normalized to `https://` for non-local hosts
 
 ---
 
-# 🏗 Project Structure
+## 5. Optional local workflow testing
+
+### News scraper + sentiment
+
+If you want to run the news pipeline locally:
 
 ```bash
-Libretix/
-├── frontend/           → Next.js 14 frontend
-├── backend/
-│   ├── main.py         → FastAPI application
-│   ├── routers/        → API routes
-│   ├── models/         → Pydantic schemas
-│   ├── db/             → Database schema & client
-│   └── requirements.txt
-├── ml-service/
-│   ├── models/         → Forecasting models
-│   └── requirements.txt
-├── scraper/
-│   ├── stocks.py       → yfinance + CoinGecko
-│   └── news.py         → RSS feeds & NewsAPI
-└── .github/workflows/  → GitHub Actions automation
+pip install -r scraper/requirements-news.txt
+python -m scraper.news
+```
+
+Environment needed:
+
+```env
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+NEWS_API_KEY=
+GEMINI_API_KEY=
+```
+
+### Prophet prediction batch
+
+```bash
+pip install -r ml_service/requirements-predict.txt
+python -m ml_service.models.prophet_model
+```
+
+### Alert checker
+
+```bash
+pip install -r scraper/requirements.txt
+python -m backend.jobs.alert_checker
+```
+
+Environment needed:
+
+```env
+SUPABASE_URL=
+SUPABASE_SERVICE_KEY=
+RESEND_API_KEY=
+ALERT_FROM_EMAIL=Libretix <onboarding@resend.dev>
 ```
 
 ---
 
-# 📊 Planned ML Features
+## API Endpoints
 
-* Prophet forecasting
-* TensorFlow Lite inference
-* Confidence interval prediction
-* Lightweight CPU deployment
-* Financial sentiment analysis
-* Missing-data handling
-* Trend forecasting
-
----
-
-# 🛡 Engineering & Validation Principles
-
-This project emphasizes:
-
-* maintainable architecture,
-* scalable workflows,
-* reproducible development,
-* and cost-efficient AI orchestration.
-
-AI assistance is treated as a development accelerator — not a replacement for software engineering fundamentals.
-
-The goal of Libretix is not only to build a stock dashboard, but also to explore how modern AI-assisted workflows can be integrated into real engineering processes responsibly and efficiently.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Health check |
+| GET | `/stocks/latest` | Latest stock list |
+| GET | `/stocks/{ticker}` | Stock detail |
+| GET | `/stocks/{ticker}/history` | Historical OHLCV |
+| GET | `/stocks/{ticker}/predict` | Stored Prophet predictions |
+| GET | `/news/` | Latest news |
+| GET | `/news/stats` | Sentiment summary |
+| GET | `/watchlist/` | Current user watchlist |
+| POST | `/watchlist/` | Add ticker to watchlist |
+| DELETE | `/watchlist/{ticker}/` | Remove ticker from watchlist |
+| GET | `/alerts/` | Active user alerts |
+| POST | `/alerts/` | Create alert |
+| DELETE | `/alerts/{alert_id}/` | Delete alert |
+| GET | `/forex/rates` | Prepared backend route, not yet used in live frontend |
 
 ---
 
-# 🎨 Current Product Highlights
+## GitHub Actions Workflows
 
-* Dark/light mode toggle in the top navigation
-* Personal watchlist synced with Supabase Auth
-* One-shot price alerts via Resend email delivery
-* Prophet prediction overlay rendered directly on the stock chart
+- `scrape-stocks.yml`
+- `scrape-news.yml`
+- `ml-predict.yml`
+- `price-alert.yml`
+- `cleanup.yml`
+- `deploy-backend-hf.yml`
+
+### Secrets currently relevant
+
+#### GitHub Actions
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_KEY`
+- `NEWS_API_KEY`
+- `GEMINI_API_KEY`
+- `RESEND_API_KEY`
+- `ALERT_FROM_EMAIL`
+- `HF_TOKEN`
+
+#### Hugging Face Space runtime
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_KEY`
+- `UPSTASH_REDIS_URL`
+- `UPSTASH_REDIS_TOKEN`
+
+Optional future runtime keys:
+- `EXCHANGE_RATE_API_KEY`
+- `FRED_API_KEY`
 
 ---
 
-# 🗺 Roadmap
+## Supabase Tables
 
-* [x] **Phase 1** — Backend API + Scraper + GitHub Actions
-* [x] **Phase 2** — Next.js Frontend Dashboard
-* [x] **Phase 3** — News & Sentiment Analysis
-* [ ] **Phase 4** — ML Prediction with Prophet + advanced sequence models
-  Prophet batch prediction and chart overlay are already live; sequence-model expansion remains open.
-* [x] **Phase 5** — Auth, Watchlist, Price Alerts, Responsive UI, Theme Toggle
+- `stock_prices`
+- `news`
+- `predictions`
+- `watchlists`
+- `price_alerts`
 
----
+### `price_alerts`
 
-# 💰 Infrastructure Cost
+```sql
+CREATE TABLE price_alerts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    ticker TEXT NOT NULL,
+    target_price NUMERIC NOT NULL,
+    condition TEXT NOT NULL CHECK (condition IN ('above', 'below')),
+    is_triggered BOOLEAN DEFAULT FALSE,
+    triggered_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-Designed to run entirely on free-tier services:
+ALTER TABLE price_alerts ENABLE ROW LEVEL SECURITY;
 
-* Supabase
-* Vercel
-* GitHub Actions
-* Hugging Face Spaces
-* Upstash Redis
+CREATE POLICY "Users can manage own alerts"
+ON price_alerts
+FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
-Estimated infrastructure cost:
-
-```bash
-$0/month
+CREATE INDEX idx_price_alerts_ticker ON price_alerts(ticker);
+CREATE INDEX idx_price_alerts_user ON price_alerts(user_id);
+CREATE INDEX idx_price_alerts_triggered ON price_alerts(is_triggered);
 ```
 
 ---
 
-# 📄 Additional Documentation
+## Roadmap Status
 
-| File                    | Description                             |
-| ----------------------- | --------------------------------------- |
-| `CLAUDE.md`             | AI orchestration & engineering workflow |
-| `PLANNING.md`           | Project planning & roadmap              |
-| `backend/db/schema.sql` | Database schema                         |
-| `.github/workflows/`    | Automation workflows                    |
+- [x] Phase 1 - Foundation
+- [x] Phase 2 - Frontend Basic
+- [x] Phase 3 - News and Sentiment
+- [ ] Phase 4 - Prophet is live, sequence-model expansion still open
+- [x] Phase 5 - Auth, watchlist, alerts, responsive UI, dark/light mode
+
+Detailed planning lives in:
+
+```text
+PLANNING.md
+```
 
 ---
 
-# ⭐ Vision
+## Important Notes About AI Usage
 
-Libretix is an experiment in combining:
+Current reality of the project:
+- Prophet work was implemented with Codex support
+- Gemini is used for frontend consultation and for sentiment analysis through Google AI Studio
+- Mistral/Cohere are not part of the current production prediction pipeline
+- there is no active LSTM model yet
 
-* financial technology,
-* machine learning,
-* open-source engineering,
-* and modern AI-assisted development workflows.
+So if you are reading older notes that mention Mistral, Cohere, FinBERT, or a separate ML FastAPI service, treat them as early planning rather than the current production setup.
 
-This project explores how AI orchestration can improve software engineering productivity while still maintaining architectural quality, human oversight, and scalable development practices.
+---
+
+## Additional Documentation
+
+- `PLANNING.md`
+- `CLAUDE.md`
+- `backend/db/schema.sql`
+- `.github/workflows/`

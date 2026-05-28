@@ -1,209 +1,208 @@
-# 🏦 Libretix — Open Source Edition
+# Libretix - Planning and Current Status
 
-## 🎯 Project Overview
+## Overview
 
-Dashboard saham real-time dengan data AS & Indonesia, berita pasar, dan prediksi ML.
-Fully free, open source, auto-update via GitHub Actions.
+Libretix is a real-time market dashboard for:
+- US stocks
+- IDX stocks
+- Crypto
 
----
+Current product direction:
+- market monitoring and research
+- news and sentiment context
+- batch-based price prediction
+- personal watchlist
+- one-shot email price alerts
 
-## 📊 Data Sources (Legal & Gratis)
-
-| Data | Source | Library | Limit |
-|------|--------|---------|-------|
-| Saham AS (NYSE/NASDAQ) | Yahoo Finance | `yfinance` | Unlimited |
-| Saham IDX | Yahoo Finance (suffix `.JK`) | `yfinance` | Unlimited |
-| Crypto | CoinGecko API | `requests` | 30 req/min |
-| Berita Saham AS | NewsAPI.org | `requests` | 100 req/hari (free) |
-| Berita IDX | CNBC Indonesia RSS | `feedparser` | Unlimited |
-| Berita Global | Reuters RSS | `feedparser` | Unlimited |
-| Indikator Ekonomi | FRED API (Federal Reserve) | `fredapi` | Unlimited |
-| Forex | ExchangeRate API | `requests` | 1500 req/bulan |
+Libretix is not a brokerage or trading execution platform.
 
 ---
 
-## 🏗️ Tech Stack
+## Current Architecture
 
 ### Frontend
-- **Framework:** Next.js 14 (App Router)
-- **UI:** Tailwind CSS + shadcn/ui
-- **Chart:** TradingView Lightweight Charts (gratis, profesional)
-- **State:** Zustand
-- **Deploy:** Vercel (free tier)
+- Next.js 14 App Router
+- Tailwind CSS
+- lightweight custom UI primitives inspired by shadcn/ui
+- TradingView Lightweight Charts
+- Zustand
+- Deploy: Vercel
 
 ### Backend
-- **Framework:** FastAPI (Python)
-- **Database:** Supabase (PostgreSQL, free tier — 500MB)
-- **Cache:** Upstash Redis (free tier — 10k req/hari)
-- **Deploy:** Railway.app (free tier) atau Render.com (gratis)
+- FastAPI
+- Supabase PostgreSQL
+- Upstash Redis
+- Deploy: Hugging Face Spaces (Docker)
 
-### ML Service
-- **Framework:** Batch prediction pipeline berbasis Python
-- **Model:** Prophet + model sequence-based untuk evaluasi lanjutan
-- **Operasional:** GitHub Actions + Supabase
+### Prediction
+- Prophet only
+- Executed as a batch job via GitHub Actions
+- Output stored in Supabase `predictions`
+- No separate real-time ML service yet
+- No LSTM model yet
 
-### Automation
-- **Scheduler:** GitHub Actions
-- **Storage:** Supabase + GitHub repo (CSV backup)
+### News and Sentiment
+- RSS feeds + NewsAPI
+- Sentiment analysis via Gemini API from Google AI Studio
+- Implemented in `ml_service/sentiment/analyzer.py`
+
+### Alerts
+- One-shot price alerts
+- Email delivery via Resend
+- Alert checker runs hourly via GitHub Actions
+
+### Shared ticker universe
+- `shared/tickers.py` is the source of truth for scraper and Prophet coverage
 
 ---
 
-## 🗂️ Struktur Project
+## Project Structure
 
-```
+```text
 Libretix/
-├── frontend/                    # Next.js
-│   ├── app/
-│   │   ├── page.tsx             # Landing page
-│   │   ├── dashboard/
-│   │   │   └── page.tsx         # Dashboard utama
-│   │   ├── stock/
-│   │   │   └── [ticker]/
-│   │   │       └── page.tsx     # Detail per saham
-│   │   └── news/
-│   │       └── page.tsx         # Halaman berita
-│   ├── components/
-│   │   ├── Chart.tsx
-│   │   ├── Watchlist.tsx
-│   │   ├── NewsCard.tsx
-│   │   └── PredictionBadge.tsx
-│   └── package.json
-│
-├── backend/                     # FastAPI data service
-│   ├── main.py
+├── frontend/                    # Next.js frontend
+├── backend/                     # FastAPI API + jobs
 │   ├── routers/
-│   │   ├── stocks.py
-│   │   ├── news.py
-│   │   └── forex.py
-│   ├── models/
-│   │   └── schemas.py
+│   ├── jobs/
 │   ├── db/
-│   │   └── supabase.py
 │   └── requirements.txt
-│
-├── ml-service/                  # FastAPI ML prediction
-│   ├── main.py
+├── ml_service/                  # Prophet + sentiment analysis
 │   ├── models/
-│   │   ├── prophet_model.py
-│   │   └── lstm_model.py
-│   ├── sentiment/
-│   │   └── analyzer.py
-│   └── requirements.txt
-│
-├── scraper/                     # Python scripts
-│   ├── stocks.py
-│   ├── news.py
-│   └── forex.py
-│
-├── data/                        # CSV backup
-│   ├── stocks/
-│   ├── news/
-│   └── forex/
-│
-├── .github/
-│   └── workflows/
-│       ├── scrape-stocks.yml    # Tiap jam
-│       ├── scrape-news.yml      # Tiap 3 jam
-│       └── ml-predict.yml       # Tiap hari
-│
-├── PLANNING.md                  # File ini
-├── CLAUDE.md                    # Panduan Super AI
-└── README.md
+│   └── sentiment/
+├── scraper/                     # Hourly / scheduled data collectors
+├── shared/                      # Shared config such as ticker universe
+└── .github/workflows/           # GitHub Actions automation
 ```
 
 ---
 
-## 👥 Divisi & AI yang Mengerjakan
+## Active Data Sources
 
-```
-Super AI — Claude (Pengawas)
-├── Mengawasi semua divisi
-├── Code review & integrasi
-├── Arsitektur decision
-└── Debugging cross-service
+| Area | Source | Status |
+|---|---|---|
+| US stocks | Yahoo Finance via `yfinance` | Active |
+| IDX stocks | Yahoo Finance via `yfinance` | Active |
+| Crypto | CoinGecko | Active |
+| News | RSS feeds | Active |
+| News | NewsAPI | Active when key is available |
+| Sentiment | Gemini API | Active |
+| Forex | ExchangeRate API | Not active in product yet |
+| Macro indicators | FRED API | Not active in product yet |
 
-Divisi 1 — Frontend        → Gemini
-Divisi 2 — Backend/Scraper → Claude / GitHub Copilot
-Divisi 3 — ML & Prediksi   → Mistral / Cohere
-Divisi 4 — News & Sentiment→ Gemini / GPT-4o Mini
+---
+
+## GitHub Actions in Use
+
+- `scrape-stocks.yml`
+  - hourly stock and crypto ingest
+- `scrape-news.yml`
+  - every 3 hours
+- `ml-predict.yml`
+  - daily Prophet prediction batch
+- `price-alert.yml`
+  - hourly alert checker + Resend email delivery
+- `cleanup.yml`
+  - monthly cleanup
+- `deploy-backend-hf.yml`
+  - deploy backend package to Hugging Face Spaces
+
+---
+
+## Supabase Tables
+
+### Core tables
+- `stock_prices`
+- `news`
+- `predictions`
+- `watchlists`
+- `price_alerts`
+
+### `price_alerts`
+
+```sql
+CREATE TABLE price_alerts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    ticker TEXT NOT NULL,
+    target_price NUMERIC NOT NULL,
+    condition TEXT NOT NULL CHECK (condition IN ('above', 'below')),
+    is_triggered BOOLEAN DEFAULT FALSE,
+    triggered_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE price_alerts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own alerts"
+ON price_alerts
+FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX idx_price_alerts_ticker ON price_alerts(ticker);
+CREATE INDEX idx_price_alerts_user ON price_alerts(user_id);
+CREATE INDEX idx_price_alerts_triggered ON price_alerts(is_triggered);
 ```
 
 ---
 
-## 🗓️ Timeline & Fase Pengerjaan
+## Phase Status
 
-### Phase 1 — Foundation (Minggu 1-2)
-- [x] Setup repo & struktur folder
-- [x] Scraper saham AS + IDX (yfinance)
-- [x] GitHub Actions scrape tiap jam → simpan ke Supabase
-- [x] API endpoint basic (get stock data, get history)
+### Phase 1 - Foundation
+- [x] Setup repo and folder structure
+- [x] US + IDX stock scraper using `yfinance`
+- [x] GitHub Actions hourly scraping to Supabase
+- [x] Basic API endpoints for latest price and history
 
-### Phase 2 — Frontend Basic (Minggu 3-4)
+### Phase 2 - Frontend Basic
 - [x] Dashboard layout
-- [x] Watchlist + search saham
-- [x] Chart candlestick (TradingView Lightweight Charts)
-- [x] Deploy frontend ke Vercel
+- [x] Watchlist + stock search
+- [x] Candlestick chart with TradingView Lightweight Charts
+- [x] Deploy frontend to Vercel
 
-### Phase 3 — News & Sentiment (Minggu 5-6)
-- [x] Scraper berita (NewsAPI + RSS)
-- [x] Sentiment analysis tiap artikel
-- [x] Halaman berita + filter per ticker
-- [x] Mapping berita → saham terpengaruh
+### Phase 3 - News and Sentiment
+- [x] News scraping via RSS + NewsAPI
+- [x] Sentiment analysis per article
+- [x] News page + ticker filtering
+- [x] News-to-ticker mapping
 
-### Phase 4 — ML Prediction (Minggu 7-8)
-- [x] Model Prophet untuk prediksi trend
-- [ ] Pengembangan model sequence-based (mis. LSTM) untuk evaluasi pattern recognition
-- [ ] Operasionalisasi layanan prediksi untuk kebutuhan inference real-time atau service terpisah
-- [x] Tampilkan prediksi sebagai overlay pada chart
+### Phase 4 - ML Prediction
+- [x] Prophet trend prediction
+- [ ] Sequence-based model exploration such as LSTM
+- [ ] Separate real-time inference service if later needed
+- [x] Prediction overlay on chart
 
-Catatan arsitektur:
-- Implementasi saat ini menggunakan batch prediction harian melalui GitHub Actions dan menyimpan hasil prediksi ke Supabase.
-- Pendekatan ini dipilih karena sesuai dengan kebutuhan produk saat ini, lebih sederhana secara operasional, dan efisien untuk infrastruktur free tier.
-- Deployment ML service terpisah, termasuk ke Hugging Face Spaces, tetap dapat dipertimbangkan pada tahap berikutnya apabila kebutuhan inference real-time, eksperimen model tambahan, atau orkestrasi service terpisah menjadi prioritas.
+Notes:
+- current implementation is batch-based
+- prediction output is written to Supabase, then consumed by backend and frontend
+- no Hugging Face ML inference service is required for the current architecture
 
-### Phase 5 — Polish & Auth (Minggu 9-10)
-- [x] Auth (Supabase Auth, gratis)
+### Phase 5 - Polish and Auth
+- [x] Supabase Auth
 - [x] Personal watchlist per user
-- [x] Price alert via email (Resend.com, gratis)
-- [x] Mobile responsive
+- [x] Price alert via email using Resend
+- [x] Mobile responsive polish
 - [x] Dark/light mode
 
 ---
 
-## 💰 Estimasi Biaya
+## Open Follow-ups
 
-| Service | Free Tier | Cukup? |
-|---------|-----------|--------|
-| Vercel | 100GB bandwidth/bulan | ✅ |
-| Supabase | 500MB DB, 2GB transfer | ✅ |
-| Hugging Face Spaces | CPU basic gratis | ✅ |
-| Upstash Redis | 10k req/hari | ✅ |
-| NewsAPI | 100 req/hari | ✅ |
-| Resend | 3000 email/bulan | ✅ |
-| **Total** | **$0/bulan** | ✅ |
+- evaluate whether LSTM is still worth building after Prophet coverage stabilizes
+- decide if forex deserves a real product surface or should remain postponed
+- decide if macro/FRED data should become a dedicated market context panel
+- decide whether price alerts should remain one-shot only or later support digest / cooldown modes
 
 ---
 
-## 🔑 API Keys yang Dibutuhkan
+## Reality Check vs Early Plan
 
-Daftarkan akun dan ambil API key gratis di:
-- [ ] https://newsapi.org — berita saham AS
-- [ ] https://fred.stlouisfed.org/docs/api/api_key.html — indikator ekonomi
-- [ ] https://www.exchangerate-api.com — forex
-- [ ] https://supabase.com — database
-- [ ] https://upstash.com — redis cache
-- [ ] https://resend.com — email alert
+These are important clarifications so the documentation matches the actual project:
 
-### 💡 Skenario Arsitektur Dual-Source Emas (Post-Launch)
-Untuk memberikan pengalaman analisis komoditas kelas profesional tanpa merusak limit kuota gratis, fitur emas akan memisahkan peran kedua data source:
-
-1. **Yahoo Finance (`yfinance` - Ticker: `GC=F`)**
-   - **Fokus Fitur:** Menggambar Grafik Candlestick Utama (TradingView) & Training Model ML (Prophet).
-   - **Alasan:** Menyediakan data historis harian/mingguan yang sangat panjang, stabil, dan *unlimited* (bebas kuota).
-
-2. **GoldAPI.io (XAU/IDR Spot Price)**
-   - **Fokus Fitur:** Ticker Live Card ("Harga Emas Fisik Hari Ini dalam Rp/Gram") & Kalkulator Simulasi Investasi Logam Mulia.
-   - **Alasan:** Menyediakan konversi instan ke Rupiah per gram secara akurat dari pasar fisik tanpa perlu dihitung manual di backend.
-   - **Strategi Hemat Kuota:** Karena limit *free tier* hanya 100 request/hari, data dari GoldAPI.io wajib disimpan ke **Upstash Redis Cache** dengan masa kedaluwarsa (TTL) 2 jam. Backend hanya mengetuk API ini 12 kali sehari, sehingga aman dari limit bengkak walaupun web dibuka oleh ribuan user.
-
-Simpan semua key di `.env.local` (frontend) dan `.env` (backend), jangan di-commit ke GitHub!
+- Prophet was implemented and operationalized with Codex support
+- Gemini is currently used mainly for frontend consultation and sentiment analysis via Google AI Studio
+- Mistral/Cohere are not part of the current production ML pipeline
+- There is no active LSTM implementation yet
+- There is no active forex feature in the frontend product yet
+- Backend is deployed on Hugging Face Spaces, not Railway or Render
+- Resend is now part of the live alert workflow
