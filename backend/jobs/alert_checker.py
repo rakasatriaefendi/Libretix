@@ -27,10 +27,16 @@ def get_latest_prices(sb) -> dict:
     return prices
 
 
+def format_price(ticker: str, price: float) -> str:
+    if ticker.endswith(".JK"):
+        return f"IDR {price:,.0f}"
+    return f"${price:,.2f}"
+
+
 def send_alert_email(email: str, ticker: str, condition: str, target_price: float, current_price: float):
     direction = "naik di atas" if condition == "above" else "turun di bawah"
-    formatted_current = f"${current_price:,.2f}"
-    formatted_target = f"${target_price:,.2f}"
+    formatted_current = format_price(ticker, current_price)
+    formatted_target = format_price(ticker, target_price)
     resend.Emails.send({
         "from": ALERT_FROM_EMAIL,
         "to": email,
