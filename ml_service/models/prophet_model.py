@@ -31,7 +31,7 @@ TICKERS_TO_PREDICT = {
 }
 
 PREDICT_DAYS    = 30   # Prediksi 30 hari ke depan
-MIN_DATA_POINTS = 60   # Minimal 60 hari data untuk training
+MIN_DATA_POINTS = 90   # Minimal 90 hari data untuk training
 MODEL_VERSION   = "prophet-v1"
 
 
