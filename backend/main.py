@@ -11,6 +11,7 @@ from backend.routers.forex import router as forex_router
 from backend.routers.news import router as news_router
 from backend.routers.stocks import router as stocks_router
 from backend.routers.watchlist import router as watchlist_router
+from backend.routers.alerts import router as alerts_router
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -46,6 +47,7 @@ app.include_router(stocks_router)
 app.include_router(news_router)
 app.include_router(forex_router)
 app.include_router(watchlist_router)
+app.include_router(alerts_router)
 
 
 @app.get("/", response_model=HealthResponse)
