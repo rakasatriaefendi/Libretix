@@ -1,9 +1,10 @@
 import os
 import logging
 from datetime import datetime, timezone
+
 import resend
-from supabase import create_client
 from dotenv import load_dotenv
+from supabase import create_client
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -12,8 +13,10 @@ log = logging.getLogger(__name__)
 resend.api_key = os.environ["RESEND_API_KEY"]
 ALERT_FROM_EMAIL = os.environ.get("ALERT_FROM_EMAIL", "Libretix <onboarding@resend.dev>")
 
+
 def get_supabase():
     return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
+
 
 def get_latest_prices(sb) -> dict:
     result = sb.table("stock_prices").select("ticker, price").order("timestamp", desc=True).execute()
@@ -23,26 +26,29 @@ def get_latest_prices(sb) -> dict:
             prices[row["ticker"]] = float(row["price"])
     return prices
 
+
 def send_alert_email(email: str, ticker: str, condition: str, target_price: float, current_price: float):
     direction = "naik di atas" if condition == "above" else "turun di bawah"
+    formatted_current = f"${current_price:,.2f}"
+    formatted_target = f"${target_price:,.2f}"
     resend.Emails.send({
         "from": ALERT_FROM_EMAIL,
         "to": email,
-        "subject": f"🔔 Alert: {ticker} {direction} {target_price}",
+        "subject": f"Alert: {ticker} {direction} {formatted_target}",
         "html": f"""
         <h2>Price Alert Triggered</h2>
-        <p><strong>{ticker}</strong> sekarang di harga <strong>{current_price}</strong></p>
-        <p>Target kamu: {condition} {target_price}</p>
-        <p><a href="https://libretix.vercel.app/stock/{ticker}">Lihat di Libretix →</a></p>
+        <p><strong>{ticker}</strong> sekarang di harga <strong>{formatted_current}</strong></p>
+        <p>Target kamu: {condition} {formatted_target}</p>
+        <p><a href="https://libretix.vercel.app/stock/{ticker}">Lihat di Libretix -></a></p>
         """
     })
     log.info(f"Email sent to {email} for {ticker}")
+
 
 def main():
     log.info("=== Price Alert Checker Start ===")
     sb = get_supabase()
 
-    # Ambil semua alert yang belum triggered
     alerts = sb.table("price_alerts").select("*").eq("is_triggered", False).execute().data
     for alert in alerts:
         try:
@@ -50,6 +56,7 @@ def main():
             alert["email"] = user.user.email if user and user.user else None
         except Exception:
             alert["email"] = None
+
     if not alerts:
         log.info("No active alerts")
         return
@@ -65,8 +72,10 @@ def main():
 
         target = float(alert["target_price"])
         condition = alert["condition"]
-        should_trigger = (condition == "above" and current >= target) or \
-                         (condition == "below" and current <= target)
+        should_trigger = (
+            (condition == "above" and current >= target)
+            or (condition == "below" and current <= target)
+        )
 
         if should_trigger:
             email = alert.get("email")
@@ -79,6 +88,7 @@ def main():
             triggered += 1
 
     log.info(f"=== Done. {triggered} alerts triggered ===")
+
 
 if __name__ == "__main__":
     main()
