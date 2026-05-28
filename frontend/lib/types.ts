@@ -55,3 +55,13 @@ export interface WatchlistItem {
   ticker: string;
   added_at?: string | null;
 }
+
+export interface PriceAlert {
+  id: string;
+  ticker: string;
+  target_price: number;
+  condition: "above" | "below";
+  created_at?: string | null;
+  is_triggered?: boolean;
+  triggered_at?: string | null;
+}

@@ -4,6 +4,7 @@ import type {
   Market,
   OhlcvPoint,
   Period,
+  PriceAlert,
   StockDetail,
   StockPrediction,
   StockSummary,
@@ -149,6 +150,26 @@ export async function removeWatchlistTicker(token: string, ticker: string): Prom
   await authorizedRequest<void>(`/watchlist/${encodeURIComponent(ticker)}/`, token, {
     method: "DELETE"
   });
+}
+
+export async function getAlerts(token: string): Promise<PriceAlert[]> {
+  return authorizedRequest<PriceAlert[]>("/alerts/", token);
+}
+
+export async function createAlert(
+  token: string,
+  ticker: string,
+  targetPrice: number,
+  condition: "above" | "below"
+): Promise<PriceAlert> {
+  return authorizedRequest<PriceAlert>("/alerts/", token, {
+    method: "POST",
+    body: JSON.stringify({ ticker, target_price: targetPrice, condition })
+  });
+}
+
+export async function deleteAlert(token: string, alertId: string): Promise<void> {
+  await authorizedRequest<void>(`/alerts/${alertId}/`, token, { method: "DELETE" });
 }
 
 export function toMarketLabel(market: Market) {
