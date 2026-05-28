@@ -1,4 +1,13 @@
-import type { HistoryResponse, LatestResponse, Market, OhlcvPoint, Period, StockDetail, StockSummary } from "@/lib/types";
+import type {
+  HistoryResponse,
+  LatestResponse,
+  Market,
+  OhlcvPoint,
+  Period,
+  StockDetail,
+  StockPrediction,
+  StockSummary
+} from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -81,6 +90,15 @@ export async function getStockDetail(ticker: string): Promise<StockDetail> {
 
 export async function getStockHistory(ticker: string, period: Period): Promise<OhlcvPoint[]> {
   return unwrapHistory(await request<HistoryResponse>(`/stocks/${encodeURIComponent(ticker)}/history?period=${period}`));
+}
+
+function isFuturePredictionDate(value: string) {
+  return value > new Date().toISOString().slice(0, 10);
+}
+
+export async function getStockPredictions(ticker: string): Promise<StockPrediction[]> {
+  const payload = await request<StockPrediction[]>(`/stocks/${encodeURIComponent(ticker)}/predict`);
+  return payload.filter((row) => isFuturePredictionDate(row.prediction_date));
 }
 
 export function toMarketLabel(market: Market) {

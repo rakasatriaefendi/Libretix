@@ -6,7 +6,14 @@ import { WatchlistToggleButton } from "@/components/WatchlistToggleButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { formatCompactVolume, formatCurrency, getStockDetail, getStockHistory, resolveDisplayChange } from "@/lib/api";
+import {
+  formatCompactVolume,
+  formatCurrency,
+  getStockDetail,
+  getStockHistory,
+  getStockPredictions,
+  resolveDisplayChange
+} from "@/lib/api";
 import type { OhlcvPoint, Period } from "@/lib/types";
 
 const periods: Period[] = ["1d", "5d", "1mo", "3mo", "1y"];
@@ -37,7 +44,11 @@ function getHistoryPreviousClose(rows: OhlcvPoint[], currentPrice: number) {
 }
 
 async function StockDetailView({ ticker, period }: { ticker: string; period: Period }) {
-  const [detail, history] = await Promise.all([getStockDetail(ticker), getStockHistory(ticker, period)]);
+  const [detail, history, predictions] = await Promise.all([
+    getStockDetail(ticker),
+    getStockHistory(ticker, period),
+    getStockPredictions(ticker)
+  ]);
   const chartData = normalizeChartData(history);
   const firstBar = chartData[0];
   const lastBar = chartData.at(-1);
@@ -98,7 +109,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
           </div>
         </CardHeader>
         <CardContent>
-          <Chart ticker={ticker} data={chartData} />
+          <Chart ticker={ticker} data={chartData} predictions={predictions} />
         </CardContent>
       </Card>
 
@@ -124,7 +135,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
       </Card>
 
       <Suspense fallback={<PredictionBadgeSkeleton />}>
-        <PredictionBadge ticker={ticker} market={detail.market ?? "US"} />
+        <PredictionBadge ticker={ticker} market={detail.market ?? "US"} predictions={predictions} />
       </Suspense>
     </div>
   );

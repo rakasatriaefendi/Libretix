@@ -38,9 +38,9 @@ Fully free, open source, auto-update via GitHub Actions.
 - **Deploy:** Railway.app (free tier) atau Render.com (gratis)
 
 ### ML Service
-- **Framework:** FastAPI terpisah
-- **Model:** Prophet + LSTM (TensorFlow Lite)
-- **Deploy:** Hugging Face Spaces (gratis, support Python)
+- **Framework:** Batch prediction pipeline berbasis Python
+- **Model:** Prophet + model sequence-based untuk evaluasi lanjutan
+- **Operasional:** GitHub Actions + Supabase
 
 ### Automation
 - **Scheduler:** GitHub Actions
@@ -151,10 +151,15 @@ Divisi 4 — News & Sentiment→ Gemini / GPT-4o Mini
 - [x] Mapping berita → saham terpengaruh
 
 ### Phase 4 — ML Prediction (Minggu 7-8)
-- [ ] Model Prophet untuk prediksi trend
-- [ ] LSTM untuk pattern recognition
-- [ ] Deploy ML service ke Hugging Face Spaces
-- [ ] Tampilkan prediksi di chart
+- [x] Model Prophet untuk prediksi trend
+- [ ] Pengembangan model sequence-based (mis. LSTM) untuk evaluasi pattern recognition
+- [ ] Operasionalisasi layanan prediksi untuk kebutuhan inference real-time atau service terpisah
+- [ ] Tampilkan prediksi sebagai overlay pada chart
+
+Catatan arsitektur:
+- Implementasi saat ini menggunakan batch prediction harian melalui GitHub Actions dan menyimpan hasil prediksi ke Supabase.
+- Pendekatan ini dipilih karena sesuai dengan kebutuhan produk saat ini, lebih sederhana secara operasional, dan efisien untuk infrastruktur free tier.
+- Deployment ML service terpisah, termasuk ke Hugging Face Spaces, tetap dapat dipertimbangkan pada tahap berikutnya apabila kebutuhan inference real-time, eksperimen model tambahan, atau orkestrasi service terpisah menjadi prioritas.
 
 ### Phase 5 — Polish & Auth (Minggu 9-10)
 - [ ] Auth (Supabase Auth, gratis)

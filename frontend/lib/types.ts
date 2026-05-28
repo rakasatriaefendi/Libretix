@@ -41,3 +41,12 @@ export interface HistoryResponse {
   history?: OhlcvPoint[];
   prices?: OhlcvPoint[];
 }
+
+export interface StockPrediction {
+  ticker?: string;
+  predicted_price: number;
+  confidence_low: number;
+  confidence_high: number;
+  prediction_date: string;
+  model_used?: string;
+}
