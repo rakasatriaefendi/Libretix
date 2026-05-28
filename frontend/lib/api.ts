@@ -23,7 +23,11 @@ function normalizeApiBaseUrl(value: string) {
 
 function getApiUrl(path: string) {
   if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL is not set");
-  return new URL(path, normalizeApiBaseUrl(API_URL)).toString();
+  const base = normalizeApiBaseUrl(API_URL);
+  const [pathname, search] = path.split("?");
+  const normalizedPath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+  const fullPath = search ? `${normalizedPath}?${search}` : normalizedPath;
+  return new URL(fullPath, base).toString();
 }
 
 async function request<T>(path: string): Promise<T> {
@@ -127,11 +131,11 @@ export async function getStockPredictions(ticker: string): Promise<StockPredicti
 }
 
 export async function getWatchlist(token: string): Promise<WatchlistItem[]> {
-  return authorizedRequest<WatchlistItem[]>("/watchlist", token);
+  return authorizedRequest<WatchlistItem[]>("/watchlist/", token);
 }
 
 export async function addWatchlistTicker(token: string, ticker: string): Promise<WatchlistItem> {
-  return authorizedRequest<WatchlistItem>("/watchlist", token, {
+  return authorizedRequest<WatchlistItem>("/watchlist/", token, {
     method: "POST",
     body: JSON.stringify({ ticker })
   });
