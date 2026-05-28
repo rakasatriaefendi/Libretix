@@ -64,3 +64,12 @@ class Prediction(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     version: str
+
+
+class WatchlistItem(BaseModel):
+    ticker: str
+    added_at: Optional[datetime] = None
+
+
+class WatchlistUpsertRequest(BaseModel):
+    ticker: str

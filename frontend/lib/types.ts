@@ -50,3 +50,8 @@ export interface StockPrediction {
   prediction_date: string;
   model_used?: string;
 }
+
+export interface WatchlistItem {
+  ticker: string;
+  added_at?: string | null;
+}

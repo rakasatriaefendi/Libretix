@@ -6,7 +6,8 @@ import type {
   Period,
   StockDetail,
   StockPrediction,
-  StockSummary
+  StockSummary,
+  WatchlistItem
 } from "@/lib/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -19,6 +20,21 @@ function getApiUrl(path: string) {
 async function request<T>(path: string): Promise<T> {
   const response = await fetch(getApiUrl(path), { cache: "no-store" });
   if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+  return (await response.json()) as T;
+}
+
+async function authorizedRequest<T>(path: string, token: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(getApiUrl(path), {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(init?.headers ?? {})
+    },
+    cache: "no-store"
+  });
+  if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
@@ -99,6 +115,23 @@ function isFuturePredictionDate(value: string) {
 export async function getStockPredictions(ticker: string): Promise<StockPrediction[]> {
   const payload = await request<StockPrediction[]>(`/stocks/${encodeURIComponent(ticker)}/predict`);
   return payload.filter((row) => isFuturePredictionDate(row.prediction_date));
+}
+
+export async function getWatchlist(token: string): Promise<WatchlistItem[]> {
+  return authorizedRequest<WatchlistItem[]>("/watchlist", token);
+}
+
+export async function addWatchlistTicker(token: string, ticker: string): Promise<WatchlistItem> {
+  return authorizedRequest<WatchlistItem>("/watchlist", token, {
+    method: "POST",
+    body: JSON.stringify({ ticker })
+  });
+}
+
+export async function removeWatchlistTicker(token: string, ticker: string): Promise<void> {
+  await authorizedRequest<void>(`/watchlist/${encodeURIComponent(ticker)}`, token, {
+    method: "DELETE"
+  });
 }
 
 export function toMarketLabel(market: Market) {

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Plus, Star, Trash2 } from "lucide-react";
+import { useWatchlistActions } from "@/hooks/useWatchlistActions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatCurrency, resolveDisplayChange, toMarketLabel } from "@/lib/api";
-import { useWatchlistStore } from "@/lib/store";
+import { useAuthStore, useWatchlistStore } from "@/lib/store";
 import type { Market, StockSummary } from "@/lib/types";
 
 type WatchlistStock = StockSummary & { market: Market };
@@ -15,10 +16,12 @@ function WatchlistRow({
   stock,
   saved,
   onToggle,
+  disabled,
 }: {
   stock: WatchlistStock;
   saved: boolean;
   onToggle: (ticker: string) => void;
+  disabled?: boolean;
 }) {
   const { changePct, positive } = resolveDisplayChange({
     price: stock.price,
@@ -43,6 +46,7 @@ function WatchlistRow({
         size="sm"
         variant={saved ? "ghost" : "outline"}
         onClick={() => onToggle(stock.ticker)}
+        disabled={disabled}
         className={saved ? "text-rose-300 hover:text-rose-200" : "text-white/70"}
       >
         {saved ? <Trash2 size={14} /> : <Plus size={14} />}
@@ -53,8 +57,10 @@ function WatchlistRow({
 
 export function WatchlistClient({ stocks }: { stocks: WatchlistStock[] }) {
   const [query, setQuery] = useState("");
-  const tickers = useWatchlistStore((state) => state.tickers);
-  const toggleTicker = useWatchlistStore((state) => state.toggleTicker);
+  const user = useAuthStore((state) => state.user);
+  const authLoading = useAuthStore((state) => state.loading);
+  const syncStatus = useWatchlistStore((state) => state.syncStatus);
+  const { tickers, pendingTicker, toggleTicker } = useWatchlistActions();
 
   const stockMap = useMemo(() => new Map(stocks.map((stock) => [stock.ticker, stock])), [stocks]);
   const watchlistStocks = useMemo(
@@ -112,6 +118,7 @@ export function WatchlistClient({ stocks }: { stocks: WatchlistStock[] }) {
                   stock={stock}
                   saved={tickers.includes(stock.ticker)}
                   onToggle={toggleTicker}
+                  disabled={pendingTicker === stock.ticker}
                 />
               ))}
             </div>
@@ -130,6 +137,16 @@ export function WatchlistClient({ stocks }: { stocks: WatchlistStock[] }) {
           </div>
         </CardHeader>
         <CardContent>
+          {(authLoading || (user && syncStatus === "syncing")) && (
+            <div className="mb-3 rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white/45">
+              Syncing your watchlist...
+            </div>
+          )}
+          {syncStatus === "error" && (
+            <div className="mb-3 rounded-lg border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-300">
+              Watchlist cloud sync failed. Please try signing in again.
+            </div>
+          )}
           {tickers.length === 0 ? (
             <div className="rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white/45">
               Belum ada ticker di watchlist. Tambahkan dari hasil pencarian di atas.
@@ -137,7 +154,13 @@ export function WatchlistClient({ stocks }: { stocks: WatchlistStock[] }) {
           ) : (
             <div className="space-y-3">
               {watchlistStocks.map((stock) => (
-                <WatchlistRow key={stock.ticker} stock={stock} saved onToggle={toggleTicker} />
+                <WatchlistRow
+                  key={stock.ticker}
+                  stock={stock}
+                  saved
+                  onToggle={toggleTicker}
+                  disabled={pendingTicker === stock.ticker}
+                />
               ))}
               {missingTickers.length > 0 && (
                 <div className="rounded-lg border border-white/10 bg-black/40 p-4 text-sm text-white/45">

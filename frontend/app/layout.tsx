@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Clock3, Newspaper, Search, Star, LayoutDashboard } from "lucide-react";
 import "./globals.css";
+import { AuthBootstrap } from "@/components/AuthBootstrap";
+import { AuthStatusControl } from "@/components/AuthStatusControl";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { RealTimeClock } from "@/components/RealTimeClock";
@@ -23,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-[#0a0a0a] text-zinc-100 overflow-hidden">
+        <AuthBootstrap />
         <div className="flex h-screen overflow-hidden">
 
           {/* Overlay mobile */}
@@ -57,6 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Newspaper size={16} /> News
                 </Link>
               </nav>
+              <div className="mt-4 border-t border-white/10 pt-4">
+                <AuthStatusControl />
+              </div>
               <div className="mt-auto text-xs text-white/35">Real-time terminal shell</div>
             </div>
           </aside>
