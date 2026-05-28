@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 export type NewsItem = {
@@ -84,6 +84,7 @@ function formatPublishedAt(publishedAt: string) {
 }
 
 function NewsCard({ item }: { item: NewsItem }) {
+  const router = useRouter();
   const published = item.published_at ? formatPublishedAt(item.published_at) : null;
 
   return (
@@ -112,14 +113,18 @@ function NewsCard({ item }: { item: NewsItem }) {
           {item.tickers_affected && item.tickers_affected.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {item.tickers_affected.slice(0, 5).map((ticker) => (
-                <Link
+                <button
                   key={ticker}
-                  href={`/stock/${encodeURIComponent(ticker)}`}
-                  onClick={(e) => e.stopPropagation()}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/stock/${encodeURIComponent(ticker)}`);
+                  }}
                   className="rounded bg-[#00d964]/10 px-1.5 py-0.5 text-xs text-[#00d964] hover:bg-[#00d964]/20"
                 >
                   {ticker}
-                </Link>
+                </button>
               ))}
             </div>
           )}

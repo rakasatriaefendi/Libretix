@@ -16,12 +16,12 @@ export function StockCard({ stock }: { stock: StockSummary }) {
   return (
     <Link href={`/stock/${encodeURIComponent(stock.ticker)}`}>
       <Card className="transition hover:border-[#00d964]/40 hover:shadow-glow">
-        <CardContent className="flex items-center justify-between gap-4 p-3">
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold">{stock.ticker}</div>
-            <div className="text-xs text-white/45">{stock.market ?? ""}</div>
+        <CardContent className="flex items-start justify-between gap-2 p-2 sm:items-center sm:gap-4 sm:p-3">
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-sm font-medium">{stock.ticker}</div>
+            <div className="hidden text-xs text-white/40 sm:block">{stock.market ?? ""}</div>
           </div>
-          <div className="text-right">
+          <div className="min-w-0 text-right">
             <div className="text-sm font-semibold">{formatCurrency(stock.price, stock.market, stock.ticker)}</div>
             <div className={positive ? "flex items-center gap-1 text-xs text-emerald-400" : "flex items-center gap-1 text-xs text-rose-400"}>
               {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}

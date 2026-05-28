@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock3, Newspaper, Search, Star, LayoutDashboard } from "lucide-react";
 import "./globals.css";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const search = useUiStore((state) => state.search);
   const setSearch = useUiStore((state) => state.setSearch);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   return (
     <html lang="en">

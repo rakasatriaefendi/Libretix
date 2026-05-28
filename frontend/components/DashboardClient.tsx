@@ -61,7 +61,7 @@ export function DashboardClient({ sections }: { sections: MarketSection[] }) {
                     Failed to load {toMarketLabel(section.market)} market data.
                   </div>
                 ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
                     {section.stocks.map((stock) => (
                       <StockCard key={stock.ticker} stock={{ ...stock, market: section.market }} />
                     ))}
