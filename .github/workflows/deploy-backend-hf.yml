@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - ".github/workflows/deploy-backend-hf.yml"
   workflow_dispatch:
 
 jobs:
@@ -21,29 +22,6 @@ jobs:
           git config --global user.email "ci@libretix.com"
           git config --global user.name "Libretix CI"
 
-      - name: Prepare backend for HF Spaces
-        run: |
-          # Copy backend ke folder temp
-          cp -r backend /tmp/hf-backend
-          cd /tmp/hf-backend
-
-          # Fix imports for flattened HF Space structure.
-          # All transformed files stay in /tmp only; source repo is untouched.
-          find . -name "*.py" -type f -print0 | while IFS= read -r -d '' file; do
-            sed -i 's/from backend\.db import /from db import /g' "$file"
-            sed -i 's/from backend\.db\./from db./g' "$file"
-            sed -i 's/from backend\.models import /from models import /g' "$file"
-            sed -i 's/from backend\.models\./from models./g' "$file"
-            sed -i 's/from backend\.routers import /from routers import /g' "$file"
-            sed -i 's/from backend\.routers\./from routers./g' "$file"
-            sed -i 's/import backend\.db/import db/g' "$file"
-            sed -i 's/import backend\.db\./import db./g' "$file"
-            sed -i 's/import backend\.models/import models/g' "$file"
-            sed -i 's/import backend\.models\./import models./g' "$file"
-            sed -i 's/import backend\.routers/import routers/g' "$file"
-            sed -i 's/import backend\.routers\./import routers./g' "$file"
-          done
-
       - name: Deploy to HF Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -51,9 +29,25 @@ jobs:
           # Clone HF Space
           git clone https://rakabaebae:$HF_TOKEN@huggingface.co/spaces/rakabaebae/libretix-backend /tmp/hf-space
 
-          # Sync file backend ke HF Space (kecuali .git dan __pycache__)
-          rsync -av --delete --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' \
-            /tmp/hf-backend/ /tmp/hf-space/
+          # Keep HF structure package-based:
+          # /main.py -> from backend.main import app
+          # /backend/** -> actual FastAPI source
+          mkdir -p /tmp/hf-space/backend
+
+          # Remove stale flattened artifacts from older deploys.
+          rm -rf /tmp/hf-space/db /tmp/hf-space/models /tmp/hf-space/routers
+          rm -f /tmp/hf-space/__init__.py
+
+          # Sync backend package only.
+          rsync -av --delete --exclude='__pycache__' --exclude='*.pyc' \
+            backend/ /tmp/hf-space/backend/
+
+          # Keep root entrypoint tiny and stable for HF.
+          printf 'from backend.main import app\n' > /tmp/hf-space/main.py
+
+          # Mirror backend runtime metadata expected by the HF Space root.
+          cp backend/requirements.txt /tmp/hf-space/requirements.txt
+          cp backend/.env.example /tmp/hf-space/.env.example
 
           # Commit dan push
           cd /tmp/hf-space
