@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-full.png" alt="Libretix" width="320">
+</p>
+
 # Libretix
 
 Real-time market dashboard for US stocks, IDX stocks, and crypto with:
@@ -233,12 +237,15 @@ Important note for local testing:
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/` | Health check |
+| GET | `/health` | Secondary health endpoint |
 | GET | `/stocks/latest` | Latest stock list |
 | GET | `/stocks/{ticker}` | Stock detail |
 | GET | `/stocks/{ticker}/history` | Historical OHLCV |
 | GET | `/stocks/{ticker}/predict` | Stored Prophet predictions |
 | GET | `/news/` | Latest news |
+| GET | `/news/sources` | Available news sources |
 | GET | `/news/stats` | Sentiment summary |
+| GET | `/news/{news_id}` | Single news item |
 | GET | `/watchlist/` | Current user watchlist |
 | POST | `/watchlist/` | Add ticker to watchlist |
 | DELETE | `/watchlist/{ticker}/` | Remove ticker from watchlist |
