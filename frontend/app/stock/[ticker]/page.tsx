@@ -86,7 +86,6 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
               <p className="text-sm text-white/45">{detail.name ?? "Market detail"}</p>
               <div className="mt-3">
                 <WatchlistToggleButton ticker={detail.ticker} />
-                <PriceAlertSection ticker={detail.ticker} currentPrice={detail.price} market={detail.market} />
               </div>
             </div>
             <div className={positive ? "text-right text-emerald-400" : "text-right text-rose-400"}>
@@ -99,6 +98,8 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
           </div>
         </CardHeader>
       </Card>
+
+      <PriceAlertSection ticker={detail.ticker} currentPrice={detail.price} market={detail.market} />
 
       <Card>
         <CardHeader>

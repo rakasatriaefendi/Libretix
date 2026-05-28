@@ -115,7 +115,7 @@ export function PriceAlertSection({
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-white/10 bg-black/30 p-3">
+    <div className="rounded-xl border border-white/10 bg-[#111111]/90 p-4 backdrop-blur">
       <div className="flex items-center gap-2">
         <Bell size={14} className="text-[#00d964]" />
         <h2 className="text-xs font-semibold tracking-[0.2em] text-[#00d964]">PRICE ALERT</h2>
@@ -161,7 +161,7 @@ export function PriceAlertSection({
           </div>
         ) : tickerAlerts.length === 0 ? (
           <div className="rounded-lg border border-white/10 bg-black/40 p-3 text-sm text-white/45">
-            No active alerts for {ticker}.
+            No alerts set.
           </div>
         ) : (
           tickerAlerts.map((alert) => (
