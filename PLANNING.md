@@ -176,7 +176,6 @@ Catatan arsitektur:
 |---------|-----------|--------|
 | Vercel | 100GB bandwidth/bulan | ✅ |
 | Supabase | 500MB DB, 2GB transfer | ✅ |
-| Railway | $5 credit/bulan | ✅ awal |
 | Hugging Face Spaces | CPU basic gratis | ✅ |
 | Upstash Redis | 10k req/hari | ✅ |
 | NewsAPI | 100 req/hari | ✅ |

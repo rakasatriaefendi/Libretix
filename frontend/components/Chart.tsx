@@ -10,7 +10,7 @@ import {
   type ISeriesApi,
   type UTCTimestamp
 } from "lightweight-charts";
-import { useThemeStore } from "@/lib/store";
+import { useThemeStore, type ThemeMode } from "@/lib/store";
 import type { OhlcvPoint } from "@/lib/types";
 
 type PredictionPoint = {
@@ -19,6 +19,28 @@ type PredictionPoint = {
   confidence_high: number;
   prediction_date: string;
 };
+
+function getChartPalette(theme: ThemeMode) {
+  if (theme === "light") {
+    return {
+      background: "#ffffff",
+      text: "rgba(16, 24, 40, 0.78)",
+      grid: "rgba(15, 23, 42, 0.10)",
+      border: "rgba(15, 23, 42, 0.16)",
+      prediction: "#d97706",
+      confidence: "rgba(217, 119, 6, 0.42)"
+    };
+  }
+
+  return {
+    background: "#0a0a0a",
+    text: "rgba(229, 229, 229, 0.76)",
+    grid: "rgba(255, 255, 255, 0.05)",
+    border: "rgba(255, 255, 255, 0.10)",
+    prediction: "#f59e0b",
+    confidence: "rgba(245, 158, 11, 0.24)"
+  };
+}
 
 export function Chart({
   ticker,
@@ -36,6 +58,7 @@ export function Chart({
   const confidenceLowRef = useRef<ISeriesApi<"Line"> | null>(null);
   const confidenceHighRef = useRef<ISeriesApi<"Line"> | null>(null);
   const theme = useThemeStore((state) => state.theme);
+  const palette = useMemo(() => getChartPalette(theme), [theme]);
 
   const seriesData = useMemo(
     () =>
@@ -70,20 +93,19 @@ export function Chart({
   useEffect(() => {
     if (!ref.current) return;
 
-    const styles = getComputedStyle(document.documentElement);
     const chart = createChart(ref.current, {
       autoSize: true,
       layout: {
-        background: { color: styles.getPropertyValue("--chart-bg").trim() || "#0a0a0a" },
-        textColor: styles.getPropertyValue("--text-secondary").trim() || "#cfcfcf"
+        background: { color: palette.background },
+        textColor: palette.text
       },
       grid: {
-        vertLines: { color: styles.getPropertyValue("--chart-grid").trim() || "rgba(255,255,255,0.05)" },
-        horzLines: { color: styles.getPropertyValue("--chart-grid").trim() || "rgba(255,255,255,0.05)" }
+        vertLines: { color: palette.grid },
+        horzLines: { color: palette.grid }
       },
       crosshair: { mode: 1 },
-      timeScale: { borderColor: styles.getPropertyValue("--chart-border").trim() || "rgba(255,255,255,0.1)" },
-      rightPriceScale: { borderColor: styles.getPropertyValue("--chart-border").trim() || "rgba(255,255,255,0.1)" }
+      timeScale: { borderColor: palette.border },
+      rightPriceScale: { borderColor: palette.border }
     });
 
     const series = chart.addSeries(CandlestickSeries, {
@@ -94,7 +116,7 @@ export function Chart({
       wickDownColor: "#ef4444"
     });
     const predictedSeries = chart.addSeries(LineSeries, {
-      color: "#f59e0b",
+      color: palette.prediction,
       lineWidth: 2,
       lineStyle: LineStyle.Dashed,
       lastValueVisible: false,
@@ -102,14 +124,14 @@ export function Chart({
       crosshairMarkerVisible: true
     });
     const lowSeries = chart.addSeries(LineSeries, {
-      color: "rgba(245,158,11,0.2)",
+      color: palette.confidence,
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
       crosshairMarkerVisible: false
     });
     const highSeries = chart.addSeries(LineSeries, {
-      color: "rgba(245,158,11,0.2)",
+      color: palette.confidence,
       lineWidth: 1,
       lastValueVisible: false,
       priceLineVisible: false,
@@ -127,8 +149,33 @@ export function Chart({
     lowSeries.setData(predictionSeries.map((item) => ({ time: item.time, value: item.confidence_low })));
     highSeries.setData(predictionSeries.map((item) => ({ time: item.time, value: item.confidence_high })));
 
-    return () => chart.remove();
-  }, [predictionSeries, seriesData, theme]);
+    return () => {
+      chartRef.current = null;
+      seriesRef.current = null;
+      predictedSeriesRef.current = null;
+      confidenceLowRef.current = null;
+      confidenceHighRef.current = null;
+      chart.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    chartRef.current?.applyOptions({
+      layout: {
+        background: { color: palette.background },
+        textColor: palette.text
+      },
+      grid: {
+        vertLines: { color: palette.grid },
+        horzLines: { color: palette.grid }
+      },
+      timeScale: { borderColor: palette.border },
+      rightPriceScale: { borderColor: palette.border }
+    });
+    predictedSeriesRef.current?.applyOptions({ color: palette.prediction });
+    confidenceLowRef.current?.applyOptions({ color: palette.confidence });
+    confidenceHighRef.current?.applyOptions({ color: palette.confidence });
+  }, [palette]);
 
   useEffect(() => {
     seriesRef.current?.setData(seriesData);
