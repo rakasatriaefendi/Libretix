@@ -27,6 +27,8 @@ export function PriceAlertSection({
   const [submitting, setSubmitting] = useState(false);
   const [deletingAlertId, setDeletingAlertId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const parsedPreviewPrice = Number(targetPrice);
+  const hasValidPreviewPrice = Number.isFinite(parsedPreviewPrice) && parsedPreviewPrice > 0;
 
   useEffect(() => {
     setTargetPrice(currentPrice.toString());
@@ -121,16 +123,23 @@ export function PriceAlertSection({
         <h2 className="text-xs font-semibold tracking-[0.2em] text-[#00d964]">PRICE ALERT</h2>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_140px_auto]">
-        <Input
-          type="number"
-          inputMode="decimal"
-          min="0"
-          step="0.01"
-          value={targetPrice}
-          onChange={(event) => setTargetPrice(event.target.value)}
-          placeholder="Target price"
-        />
+      <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_140px_auto] sm:items-start">
+        <div>
+          <Input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.01"
+            value={targetPrice}
+            onChange={(event) => setTargetPrice(event.target.value)}
+            placeholder="Target price"
+          />
+          {hasValidPreviewPrice && (
+            <div className="mt-1 text-xs text-white/45">
+              {formatCurrency(parsedPreviewPrice, market, ticker)}
+            </div>
+          )}
+        </div>
         <select
           value={condition}
           onChange={(event) => setCondition(event.target.value as "above" | "below")}
