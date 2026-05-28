@@ -12,6 +12,7 @@ import pandas as pd
 from prophet import Prophet
 from supabase import create_client
 from dotenv import load_dotenv
+from shared.tickers import CRYPTO_TICKERS, IDX_TICKERS, US_TICKERS
 
 load_dotenv()
 
@@ -24,9 +25,9 @@ log = logging.getLogger(__name__)
 
 # Ticker yang diprediksi — subset dari semua ticker
 TICKERS_TO_PREDICT = {
-    "US":     ["AAPL", "MSFT", "GOOGL", "NVDA", "TSLA"],
-    "IDX":    ["BBCA.JK", "BBRI.JK", "TLKM.JK", "BMRI.JK", "ASII.JK"],
-    "CRYPTO": ["BTC-USD", "ETH-USD", "BNB-USD"],
+    "US":     US_TICKERS,
+    "IDX":    IDX_TICKERS,
+    "CRYPTO": list(CRYPTO_TICKERS.values()),
 }
 
 PREDICT_DAYS    = 30   # Prediksi 30 hari ke depan

@@ -13,24 +13,15 @@ import yfinance as yf
 import requests
 from supabase import create_client
 from dotenv import load_dotenv
+from shared.tickers import CRYPTO_TICKERS, IDX_TICKERS, US_TICKERS
 
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-US_TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "NVDA", "TSLA", "JPM", "V", "WMT"]
-IDX_TICKERS = ["BBCA.JK", "BBRI.JK", "TLKM.JK", "ASII.JK", "BMRI.JK",
-               "GOTO.JK", "BYAN.JK", "UNVR.JK", "ICBP.JK", "EXCL.JK"]
-CRYPTO_IDS  = ["bitcoin", "ethereum", "binancecoin", "solana", "ripple"]
-
-CRYPTO_TICKER_MAP = {
-    "bitcoin": "BTC-USD",
-    "ethereum": "ETH-USD",
-    "binancecoin": "BNB-USD",
-    "solana": "SOL-USD",
-    "ripple": "XRP-USD",
-}
+CRYPTO_IDS = list(CRYPTO_TICKERS.keys())
+CRYPTO_TICKER_MAP = CRYPTO_TICKERS
 
 
 def get_supabase():
