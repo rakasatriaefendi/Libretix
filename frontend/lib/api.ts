@@ -12,9 +12,18 @@ import type {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+function normalizeApiBaseUrl(value: string) {
+  const parsed = new URL(value);
+  const isLocalhost = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+  if (!isLocalhost && parsed.protocol === "http:") {
+    parsed.protocol = "https:";
+  }
+  return parsed.toString();
+}
+
 function getApiUrl(path: string) {
   if (!API_URL) throw new Error("NEXT_PUBLIC_API_URL is not set");
-  return new URL(path, API_URL).toString();
+  return new URL(path, normalizeApiBaseUrl(API_URL)).toString();
 }
 
 async function request<T>(path: string): Promise<T> {

@@ -2,6 +2,16 @@ import { NewsClient } from "@/components/NewsClient";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+function getApiBaseUrl() {
+  if (!API_URL) return null;
+  const parsed = new URL(API_URL);
+  const isLocalhost = parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+  if (!isLocalhost && parsed.protocol === "http:") {
+    parsed.protocol = "https:";
+  }
+  return parsed.toString().replace(/\/$/, "");
+}
+
 export type NewsItem = {
   id: string;
   title: string;
@@ -28,8 +38,10 @@ export type NewsStats = {
 
 async function getNews(): Promise<NewsItem[]> {
   try {
+    const apiBaseUrl = getApiBaseUrl();
+    if (!apiBaseUrl) return [];
     const params = new URLSearchParams({ limit: "100" });
-    const res = await fetch(`${API_URL}/news/?${params}`, {
+    const res = await fetch(`${apiBaseUrl}/news/?${params}`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return [];
@@ -41,7 +53,9 @@ async function getNews(): Promise<NewsItem[]> {
 
 async function getStats(): Promise<NewsStats | null> {
   try {
-    const res = await fetch(`${API_URL}/news/stats`, {
+    const apiBaseUrl = getApiBaseUrl();
+    if (!apiBaseUrl) return null;
+    const res = await fetch(`${apiBaseUrl}/news/stats`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;
