@@ -220,6 +220,12 @@ RESEND_API_KEY=
 ALERT_FROM_EMAIL=Libretix <onboarding@resend.dev>
 ```
 
+Important note for local testing:
+- `onboarding@resend.dev` is only for Resend testing
+- with this sender, Resend can only deliver to the email address associated with your own Resend account
+- example: if your Resend account uses `example-alert@gmail.com`, alert emails will go to `example-alert@gmail.com`, not to arbitrary end-user addresses
+- to send alert emails to real user inboxes, you must verify a custom domain in Resend and switch `ALERT_FROM_EMAIL` to that domain
+
 ---
 
 ## API Endpoints

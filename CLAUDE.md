@@ -287,6 +287,12 @@ RESEND_API_KEY=
 ALERT_FROM_EMAIL=Libretix <onboarding@resend.dev>
 ```
 
+Important Resend testing limitation:
+- `onboarding@resend.dev` is only meant for testing
+- with that sender, emails can only be delivered to the email address attached to the current Resend account
+- this means local alert tests may succeed only for the project owner's Resend account inbox, not arbitrary user emails
+- real outbound alert delivery requires a verified custom domain in Resend
+
 ### Local news sentiment testing
 ```env
 GEMINI_API_KEY=
@@ -361,6 +367,7 @@ GEMINI_API_KEY=
 2. verify `RESEND_API_KEY`
 3. verify `ALERT_FROM_EMAIL`
 4. inspect `price_alerts.is_triggered`
+5. if using `onboarding@resend.dev`, remember Resend will only deliver to the account owner's own email address
 
 ### If local frontend hits HTTPS errors
 1. confirm `NEXT_PUBLIC_API_URL=http://localhost:8000`
