@@ -223,6 +223,12 @@ http://localhost:3000
 | GET    | `/news/`                              | Latest financial news    |
 | GET    | `/news/?ticker=BBCA.JK`               | News by ticker           |
 | GET    | `/forex/rates`                        | Exchange rate data       |
+| GET    | `/watchlist/`                         | Current user watchlist   |
+| POST   | `/watchlist/`                         | Add ticker to watchlist  |
+| DELETE | `/watchlist/{ticker}/`                | Remove ticker from watchlist |
+| GET    | `/alerts/`                            | Active user price alerts |
+| POST   | `/alerts/`                            | Create price alert       |
+| DELETE | `/alerts/{alert_id}/`                 | Delete price alert       |
 
 ---
 
@@ -275,13 +281,23 @@ The goal of Libretix is not only to build a stock dashboard, but also to explore
 
 ---
 
+# 🎨 Current Product Highlights
+
+* Dark/light mode toggle in the top navigation
+* Personal watchlist synced with Supabase Auth
+* One-shot price alerts via Resend email delivery
+* Prophet prediction overlay rendered directly on the stock chart
+
+---
+
 # 🗺 Roadmap
 
 * [x] **Phase 1** — Backend API + Scraper + GitHub Actions
-* [ ] **Phase 2** — Next.js Frontend Dashboard
-* [ ] **Phase 3** — News & Sentiment Analysis
-* [ ] **Phase 4** — ML Prediction with Prophet + TensorFlow Lite
-* [ ] **Phase 5** — Auth, Watchlist, Price Alerts
+* [x] **Phase 2** — Next.js Frontend Dashboard
+* [x] **Phase 3** — News & Sentiment Analysis
+* [ ] **Phase 4** — ML Prediction with Prophet + advanced sequence models
+  Prophet batch prediction and chart overlay are already live; sequence-model expansion remains open.
+* [x] **Phase 5** — Auth, Watchlist, Price Alerts, Responsive UI, Theme Toggle
 
 ---
 

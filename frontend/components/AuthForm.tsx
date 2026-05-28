@@ -74,7 +74,7 @@ export function AuthForm({
       <Card className="w-full">
         <CardHeader>
           <h1 className="text-2xl font-semibold">{mode === "login" ? "Login" : "Create Account"}</h1>
-          <p className="text-sm text-white/45">
+          <p className="text-sm text-[color:var(--text-muted)]">
             {mode === "login"
               ? "Masuk untuk menyimpan watchlist Anda di cloud dan sinkron antar perangkat."
               : "Buat akun untuk menyimpan watchlist personal Anda di Libretix."}
@@ -83,7 +83,7 @@ export function AuthForm({
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm text-white/70" htmlFor="email">
+              <label className="text-sm text-[color:var(--text-secondary)]" htmlFor="email">
                 Email
               </label>
               <Input
@@ -96,7 +96,7 @@ export function AuthForm({
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm text-white/70" htmlFor="password">
+              <label className="text-sm text-[color:var(--text-secondary)]" htmlFor="password">
                 Password
               </label>
               <Input
@@ -111,18 +111,18 @@ export function AuthForm({
             </div>
 
             {error && <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-sm text-rose-300">{error}</div>}
-            {message && <div className="rounded-lg border border-[#00d964]/20 bg-[#00d964]/10 p-3 text-sm text-[#9ff2c2]">{message}</div>}
+            {message && <div className="rounded-lg border border-[color:rgba(0,217,100,0.2)] bg-[color:rgba(0,217,100,0.1)] p-3 text-sm text-emerald-500">{message}</div>}
 
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? "Please wait..." : mode === "login" ? "Login" : "Create Account"}
             </Button>
           </form>
 
-          <div className="mt-4 text-sm text-white/45">
+          <div className="mt-4 text-sm text-[color:var(--text-muted)]">
             {mode === "login" ? "Belum punya akun? " : "Sudah punya akun? "}
             <Link
               href={mode === "login" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : `/login?redirect=${encodeURIComponent(redirectTo)}`}
-              className="text-[#00d964] hover:text-[#7ff0b1]"
+              className="text-[color:var(--accent)] hover:text-emerald-500"
             >
               {mode === "login" ? "Register" : "Login"}
             </Link>

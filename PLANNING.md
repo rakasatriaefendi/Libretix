@@ -154,7 +154,7 @@ Divisi 4 — News & Sentiment→ Gemini / GPT-4o Mini
 - [x] Model Prophet untuk prediksi trend
 - [ ] Pengembangan model sequence-based (mis. LSTM) untuk evaluasi pattern recognition
 - [ ] Operasionalisasi layanan prediksi untuk kebutuhan inference real-time atau service terpisah
-- [ ] Tampilkan prediksi sebagai overlay pada chart
+- [x] Tampilkan prediksi sebagai overlay pada chart
 
 Catatan arsitektur:
 - Implementasi saat ini menggunakan batch prediction harian melalui GitHub Actions dan menyimpan hasil prediksi ke Supabase.
@@ -162,11 +162,11 @@ Catatan arsitektur:
 - Deployment ML service terpisah, termasuk ke Hugging Face Spaces, tetap dapat dipertimbangkan pada tahap berikutnya apabila kebutuhan inference real-time, eksperimen model tambahan, atau orkestrasi service terpisah menjadi prioritas.
 
 ### Phase 5 — Polish & Auth (Minggu 9-10)
-- [ ] Auth (Supabase Auth, gratis)
-- [ ] Personal watchlist per user
-- [ ] Price alert via email (Resend.com, gratis)
-- [ ] Mobile responsive
-- [ ] Dark/light mode
+- [x] Auth (Supabase Auth, gratis)
+- [x] Personal watchlist per user
+- [x] Price alert via email (Resend.com, gratis)
+- [x] Mobile responsive
+- [x] Dark/light mode
 
 ---
 

@@ -117,7 +117,7 @@ export function PriceAlertSection({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#111111]/90 p-4 backdrop-blur">
+    <div className="rounded-xl border border-[color:var(--border-color)] bg-[var(--surface)] p-4 backdrop-blur">
       <div className="flex items-center gap-2">
         <Bell size={14} className="text-[#00d964]" />
         <h2 className="text-xs font-semibold tracking-[0.2em] text-[#00d964]">PRICE ALERT</h2>
@@ -135,7 +135,7 @@ export function PriceAlertSection({
             placeholder="Target price"
           />
           {hasValidPreviewPrice && (
-            <div className="mt-1 text-xs text-white/45">
+            <div className="mt-1 text-xs text-[color:var(--text-muted)]">
               {formatCurrency(parsedPreviewPrice, market, ticker)}
             </div>
           )}
@@ -143,7 +143,7 @@ export function PriceAlertSection({
         <select
           value={condition}
           onChange={(event) => setCondition(event.target.value as "above" | "below")}
-          className="h-9 rounded-md border border-white/10 bg-black/60 px-3 text-sm text-white outline-none focus-visible:ring-1 focus-visible:ring-[#00d964]/60"
+          className="h-9 rounded-md border border-[color:var(--border-color)] bg-[var(--surface-input)] px-3 text-sm text-[color:var(--text-primary)] outline-none focus-visible:ring-1 focus-visible:ring-[#00d964]/60"
         >
           <option value="above">Above</option>
           <option value="below">Below</option>
@@ -159,27 +159,27 @@ export function PriceAlertSection({
         </div>
       )}
 
-      <div className="mt-3 text-xs text-white/45">
+      <div className="mt-3 text-xs text-[color:var(--text-muted)]">
         Current price: {formatCurrency(currentPrice, market, ticker)}
       </div>
 
       <div className="mt-3 space-y-2">
         {loadingAlerts ? (
-          <div className="rounded-lg border border-white/10 bg-black/40 p-3 text-sm text-white/45">
+          <div className="rounded-lg border border-[color:var(--border-color)] bg-[var(--surface-muted)] p-3 text-sm text-[color:var(--text-muted)]">
             Loading alerts...
           </div>
         ) : tickerAlerts.length === 0 ? (
-          <div className="rounded-lg border border-white/10 bg-black/40 p-3 text-sm text-white/45">
+          <div className="rounded-lg border border-[color:var(--border-color)] bg-[var(--surface-muted)] p-3 text-sm text-[color:var(--text-muted)]">
             No alerts set.
           </div>
         ) : (
           tickerAlerts.map((alert) => (
-            <div key={alert.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/40 p-3">
+            <div key={alert.id} className="flex items-center justify-between gap-3 rounded-lg border border-[color:var(--border-color)] bg-[var(--surface-muted)] p-3">
               <div className="min-w-0">
-                <div className="text-sm font-medium text-white/90">
+                <div className="text-sm font-medium text-[color:var(--text-primary)]">
                   {alert.condition === "above" ? "Above" : "Below"} {formatCurrency(Number(alert.target_price), market, ticker)}
                 </div>
-                <div className="text-xs text-white/45">{ticker}</div>
+                <div className="text-xs text-[color:var(--text-muted)]">{ticker}</div>
               </div>
               <Button
                 type="button"

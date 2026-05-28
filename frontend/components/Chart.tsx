@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { CandlestickSeries, LineSeries, LineStyle, createChart, type IChartApi, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
+import {
+  CandlestickSeries,
+  LineSeries,
+  LineStyle,
+  createChart,
+  type IChartApi,
+  type ISeriesApi,
+  type UTCTimestamp
+} from "lightweight-charts";
+import { useThemeStore } from "@/lib/store";
 import type { OhlcvPoint } from "@/lib/types";
 
 type PredictionPoint = {
@@ -9,11 +18,6 @@ type PredictionPoint = {
   confidence_low: number;
   confidence_high: number;
   prediction_date: string;
-};
-
-type ChartPredictionSeries = {
-  time: UTCTimestamp;
-  value: number;
 };
 
 export function Chart({
@@ -31,6 +35,8 @@ export function Chart({
   const predictedSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
   const confidenceLowRef = useRef<ISeriesApi<"Line"> | null>(null);
   const confidenceHighRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const theme = useThemeStore((state) => state.theme);
+
   const seriesData = useMemo(
     () =>
       data
@@ -46,14 +52,13 @@ export function Chart({
         .sort((a, b) => Number(a.time) - Number(b.time)),
     [data]
   );
+
   const predictionSeries = useMemo(() => {
     if (!predictions?.length) return [];
 
-    const toTimestamp = (date: string) => Math.floor(new Date(`${date}T00:00:00Z`).getTime() / 1000) as UTCTimestamp;
-
     return predictions
       .map((item) => ({
-        time: toTimestamp(item.prediction_date),
+        time: Math.floor(new Date(`${item.prediction_date}T00:00:00Z`).getTime() / 1000) as UTCTimestamp,
         predicted_price: item.predicted_price,
         confidence_low: item.confidence_low,
         confidence_high: item.confidence_high
@@ -64,14 +69,23 @@ export function Chart({
 
   useEffect(() => {
     if (!ref.current) return;
+
+    const styles = getComputedStyle(document.documentElement);
     const chart = createChart(ref.current, {
       autoSize: true,
-      layout: { background: { color: "#0a0a0a" }, textColor: "#cfcfcf" },
-      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
+      layout: {
+        background: { color: styles.getPropertyValue("--chart-bg").trim() || "#0a0a0a" },
+        textColor: styles.getPropertyValue("--text-secondary").trim() || "#cfcfcf"
+      },
+      grid: {
+        vertLines: { color: styles.getPropertyValue("--chart-grid").trim() || "rgba(255,255,255,0.05)" },
+        horzLines: { color: styles.getPropertyValue("--chart-grid").trim() || "rgba(255,255,255,0.05)" }
+      },
       crosshair: { mode: 1 },
-      timeScale: { borderColor: "rgba(255,255,255,0.1)" },
-      rightPriceScale: { borderColor: "rgba(255,255,255,0.1)" }
+      timeScale: { borderColor: styles.getPropertyValue("--chart-border").trim() || "rgba(255,255,255,0.1)" },
+      rightPriceScale: { borderColor: styles.getPropertyValue("--chart-border").trim() || "rgba(255,255,255,0.1)" }
     });
+
     const series = chart.addSeries(CandlestickSeries, {
       upColor: "#00d964",
       downColor: "#ef4444",
@@ -101,17 +115,20 @@ export function Chart({
       priceLineVisible: false,
       crosshairMarkerVisible: false
     });
+
     chartRef.current = chart;
     seriesRef.current = series;
     predictedSeriesRef.current = predictedSeries;
     confidenceLowRef.current = lowSeries;
     confidenceHighRef.current = highSeries;
+
     series.setData(seriesData);
-    predictedSeries.setData([]);
-    lowSeries.setData([]);
-    highSeries.setData([]);
+    predictedSeries.setData(predictionSeries.map((item) => ({ time: item.time, value: item.predicted_price })));
+    lowSeries.setData(predictionSeries.map((item) => ({ time: item.time, value: item.confidence_low })));
+    highSeries.setData(predictionSeries.map((item) => ({ time: item.time, value: item.confidence_high })));
+
     return () => chart.remove();
-  }, []);
+  }, [predictionSeries, seriesData, theme]);
 
   useEffect(() => {
     seriesRef.current?.setData(seriesData);
@@ -126,11 +143,11 @@ export function Chart({
   return (
     <div className="relative">
       {predictionSeries.length > 0 && (
-        <div className="pointer-events-none absolute right-3 top-3 z-10 rounded-md border border-white/10 bg-black/60 px-2.5 py-1 text-[11px] font-medium text-amber-300 backdrop-blur">
-          <span className="text-amber-400">──</span> Prediction (Prophet)
+        <div className="pointer-events-none absolute right-3 top-3 z-10 rounded-md border border-[color:var(--border-color)] bg-[var(--surface-input)] px-2.5 py-1 text-[11px] font-medium text-amber-500 backdrop-blur">
+          <span className="text-amber-500">--</span> Prediction (Prophet)
         </div>
       )}
-      <div ref={ref} aria-label={`${ticker} candlestick chart`} className="h-[360px] w-full rounded-xl border border-white/10 bg-[#0a0a0a]" />
+      <div ref={ref} aria-label={`${ticker} candlestick chart`} className="h-[360px] w-full rounded-xl border border-[color:var(--border-color)] bg-[var(--chart-bg)]" />
     </div>
   );
 }

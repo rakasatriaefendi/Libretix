@@ -19,7 +19,7 @@ export function StockCard({ stock }: { stock: StockSummary }) {
         <CardContent className="flex items-start justify-between gap-2 p-2 sm:items-center sm:gap-4 sm:p-3">
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">{stock.ticker}</div>
-            <div className="hidden text-xs text-white/40 sm:block">{stock.market ?? ""}</div>
+            <div className="hidden text-xs text-[color:var(--text-faint)] sm:block">{stock.market ?? ""}</div>
           </div>
           <div className="min-w-0 text-right">
             <div className="text-sm font-semibold">{formatCurrency(stock.price, stock.market, stock.ticker)}</div>
@@ -27,7 +27,7 @@ export function StockCard({ stock }: { stock: StockSummary }) {
               {positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
               {changePct.toFixed(2)}%
             </div>
-            <div className="text-[11px] text-white/35">{change >= 0 ? "+" : ""}{formatCurrency(change, stock.market, stock.ticker, { showSymbol: false })}</div>
+            <div className="text-[11px] text-[color:var(--text-faint)]">{change >= 0 ? "+" : ""}{formatCurrency(change, stock.market, stock.ticker, { showSymbol: false })}</div>
           </div>
         </CardContent>
       </Card>

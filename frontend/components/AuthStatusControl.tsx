@@ -19,7 +19,7 @@ export function AuthStatusControl() {
   }
 
   if (loading) {
-    return <div className="text-xs text-white/35">Checking session...</div>;
+    return <div className="text-xs text-[color:var(--text-faint)]">Checking session...</div>;
   }
 
   if (!user) {
@@ -37,7 +37,7 @@ export function AuthStatusControl() {
 
   return (
     <div className="space-y-2">
-      <div className="truncate text-xs text-white/45">{user.email}</div>
+      <div className="truncate text-xs text-[color:var(--text-muted)]">{user.email}</div>
       <Button type="button" size="sm" variant="outline" onClick={handleSignOut} className="w-full">
         Logout
       </Button>

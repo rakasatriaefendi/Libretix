@@ -36,11 +36,11 @@ export function DashboardClient({ sections }: { sections: MarketSection[] }) {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-white/45">Live market snapshot for US, IDX, and crypto.</p>
+        <p className="text-sm text-[color:var(--text-muted)]">Live market snapshot for US, IDX, and crypto.</p>
       </div>
 
       {filteredSections.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-[#111111] p-8 text-center text-sm text-white/45">
+        <div className="rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-strong)] p-8 text-center text-sm text-[color:var(--text-muted)]">
           Tidak ada ticker yang cocok dengan pencarian dashboard.
         </div>
       ) : (
@@ -50,7 +50,7 @@ export function DashboardClient({ sections }: { sections: MarketSection[] }) {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold tracking-[0.2em] text-[#00d964]">{toMarketLabel(section.market)}</h2>
-                  <span className="text-xs text-white/45">
+                  <span className="text-xs text-[color:var(--text-muted)]">
                     {section.error ? "error" : section.stocks.length} tickers
                   </span>
                 </div>

@@ -16,10 +16,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center rounded-md text-sm font-medium transition",
-          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00d964]/60 disabled:pointer-events-none disabled:opacity-50",
-          variant === "default" && "bg-[#00d964] text-black hover:bg-[#00c05a]",
-          variant === "ghost" && "bg-transparent hover:bg-white/5",
-          variant === "outline" && "border border-white/10 bg-transparent hover:bg-white/5",
+          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[color:var(--accent)]/60 disabled:pointer-events-none disabled:opacity-50",
+          variant === "default" && "bg-[color:var(--accent)] text-[color:var(--accent-foreground)] hover:bg-[color:var(--accent-strong)]",
+          variant === "ghost" && "bg-transparent text-[color:var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]",
+          variant === "outline" && "border border-[color:var(--border-color)] bg-transparent text-[color:var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]",
           size === "default" && "h-9 px-4 py-2",
           size === "sm" && "h-8 px-3",
           className

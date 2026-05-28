@@ -47,7 +47,7 @@ function SentimentBadge({ sentiment }: { sentiment: string | null }) {
   const styles = {
     positive: "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30",
     negative: "bg-rose-500/15 text-rose-400 border border-rose-500/30",
-    neutral: "bg-white/10 text-white/50 border border-white/10",
+    neutral: "border border-[color:var(--border-color)] bg-[var(--surface-muted)] text-[color:var(--text-muted)]",
   };
   return (
     <span className={`rounded px-2 py-0.5 text-xs font-medium ${styles[sentiment as keyof typeof styles] ?? styles.neutral}`}>
@@ -58,7 +58,7 @@ function SentimentBadge({ sentiment }: { sentiment: string | null }) {
 
 function ImpactDot({ impact }: { impact: string | null }) {
   if (!impact) return null;
-  const colors = { high: "bg-rose-400", medium: "bg-yellow-400", low: "bg-white/30" };
+  const colors = { high: "bg-rose-400", medium: "bg-yellow-400", low: "bg-[var(--text-faint)]" };
   return <span className={`inline-block h-1.5 w-1.5 rounded-full ${colors[impact as keyof typeof colors] ?? colors.low}`} />;
 }
 
@@ -92,21 +92,21 @@ function NewsCard({ item }: { item: NewsItem }) {
       href={item.url ?? "#"}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block rounded-xl border border-white/10 bg-[#111111] p-4 transition hover:border-[#00d964]/30 hover:bg-[#111111]/80"
+      className="group block rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-strong)] p-4 transition hover:border-[#00d964]/30 hover:bg-[var(--surface)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <SentimentBadge sentiment={item.sentiment} />
             <ImpactDot impact={item.impact} />
-            {item.source && <span className="text-xs text-white/40">{item.source}</span>}
-            {published && <span className="text-xs text-white/30">{published}</span>}
+            {item.source && <span className="text-xs text-[color:var(--text-faint)]">{item.source}</span>}
+            {published && <span className="text-xs text-[color:var(--text-faint)]">{published}</span>}
           </div>
-          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-white/90 group-hover:text-white">
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-[color:var(--text-primary)] group-hover:text-[color:var(--text-primary)]">
             {item.title}
           </h3>
           {item.summary_en && (
-            <p className="mt-1.5 line-clamp-2 text-xs text-white/50">
+            <p className="mt-1.5 line-clamp-2 text-xs text-[color:var(--text-muted)]">
               {item.summary_en}
             </p>
           )}
@@ -138,10 +138,10 @@ function StatBar({ label, value, pct, color, barColor }: { label: string; value:
   return (
     <div className="flex items-center gap-3">
       <span className={`w-16 text-xs font-medium ${color}`}>{label}</span>
-      <div className="h-1.5 flex-1 rounded-full bg-white/10">
+      <div className="h-1.5 flex-1 rounded-full bg-[var(--surface-hover)]">
         <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.max(pct, 0.5)}%` }} />
       </div>
-      <span className="w-12 text-right text-xs text-white/40">{value} ({pct}%)</span>
+      <span className="w-12 text-right text-xs text-[color:var(--text-faint)]">{value} ({pct}%)</span>
     </div>
   );
 }
@@ -234,17 +234,17 @@ export function NewsClient({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold">Market News</h1>
-          <p className="text-sm text-white/45">{filteredNews.length} artikel terbaru dari berbagai sumber</p>
+          <p className="text-sm text-[color:var(--text-muted)]">{filteredNews.length} artikel terbaru dari berbagai sumber</p>
         </div>
       </div>
 
       {stats && stats.total > 0 && (
-        <div className="rounded-xl border border-white/10 bg-[#111111] p-4">
+        <div className="rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-strong)] p-4">
           <h2 className="mb-3 text-xs font-semibold tracking-[0.2em] text-[#00d964]">MARKET SENTIMENT</h2>
           <div className="space-y-2">
             <StatBar label="Positive" value={stats.positive} pct={stats.positive_pct} color="text-emerald-400" barColor="bg-emerald-400" />
             <StatBar label="Negative" value={stats.negative} pct={stats.negative_pct} color="text-rose-400" barColor="bg-rose-400" />
-            <StatBar label="Neutral" value={stats.neutral} pct={stats.neutral_pct} color="text-white/40" barColor="bg-white/30" />
+            <StatBar label="Neutral" value={stats.neutral} pct={stats.neutral_pct} color="text-[color:var(--text-faint)]" barColor="bg-[var(--text-faint)]" />
           </div>
         </div>
       )}
@@ -277,25 +277,25 @@ export function NewsClient({
             window.setTimeout(() => setIsFocused(false), 150);
           }}
           placeholder="Search news..."
-          className="w-full rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#00d964]/40"
+          className="w-full rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-muted)] px-4 py-3 text-sm text-[color:var(--text-primary)] outline-none placeholder:text-[color:var(--text-faint)] focus:border-[#00d964]/40"
         />
 
         {isFocused && normalizedQuery && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-xl border border-white/10 bg-[#111111]">
+          <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-strong)]">
             {suggestions.map((item) => (
               <a
                 key={item.id}
                 href={item.url ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-start gap-3 border-b border-white/10 px-4 py-3 last:border-b-0 hover:bg-white/5"
+                className="flex items-start gap-3 border-b border-[color:var(--border-color)] px-4 py-3 last:border-b-0 hover:bg-[var(--surface-hover)]"
               >
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <SentimentBadge sentiment={item.sentiment} />
-                    {item.source && <span className="text-xs text-white/40">{item.source}</span>}
+                    {item.source && <span className="text-xs text-[color:var(--text-faint)]">{item.source}</span>}
                   </div>
-                  <div className="line-clamp-2 text-sm text-white/90">
+                  <div className="line-clamp-2 text-sm text-[color:var(--text-primary)]">
                     {highlightTitle(item.title, query)}
                   </div>
                 </div>
@@ -316,12 +316,12 @@ export function NewsClient({
               }
             }}
             placeholder="Filter by ticker..."
-            className="min-w-[220px] flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#00d964]/40"
+            className="min-w-[220px] flex-1 rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-muted)] px-4 py-3 text-sm text-[color:var(--text-primary)] outline-none placeholder:text-[color:var(--text-faint)] focus:border-[#00d964]/40"
           />
           <button
             type="button"
             onClick={() => applyTickerFilter(tickerQuery)}
-            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-white/70 transition hover:border-white/20 hover:text-white"
+            className="rounded-lg border border-[color:var(--border-color)] px-3 py-1.5 text-xs font-medium text-[color:var(--text-secondary)] transition hover:border-[color:var(--border-strong)] hover:text-[color:var(--text-primary)]"
           >
             Apply Ticker
           </button>
@@ -344,7 +344,7 @@ export function NewsClient({
               className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                 selectedTicker === ticker
                   ? "border-[#00d964]/50 bg-[#00d964]/10 text-[#00d964]"
-                  : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/80"
+                  : "border-[color:var(--border-color)] text-[color:var(--text-muted)] hover:border-[color:var(--border-strong)] hover:text-[color:var(--text-secondary)]"
               }`}
             >
               {ticker}
@@ -371,7 +371,7 @@ export function NewsClient({
             className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
               selectedSentiment === f.value || (!selectedSentiment && !f.value)
                 ? "border-[#00d964]/50 bg-[#00d964]/10 text-[#00d964]"
-                : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/80"
+                : "border-[color:var(--border-color)] text-[color:var(--text-muted)] hover:border-[color:var(--border-strong)] hover:text-[color:var(--text-secondary)]"
             }`}
           >
             {f.label}
@@ -380,7 +380,7 @@ export function NewsClient({
       </div>
 
       {visibleNews.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-[#111111] p-8 text-center text-sm text-white/40">
+        <div className="rounded-xl border border-[color:var(--border-color)] bg-[var(--surface-strong)] p-8 text-center text-sm text-[color:var(--text-faint)]">
           Tidak ada berita ditemukan.
         </div>
       ) : (
@@ -396,7 +396,7 @@ export function NewsClient({
           <button
             type="button"
             onClick={() => setVisibleCount((value) => value + 20)}
-            className="rounded-md border border-white/10 px-4 py-2 text-sm text-white/70 transition hover:border-white/20 hover:text-white"
+            className="rounded-md border border-[color:var(--border-color)] px-4 py-2 text-sm text-[color:var(--text-secondary)] transition hover:border-[color:var(--border-strong)] hover:text-[color:var(--text-primary)]"
           >
             Load More
           </button>

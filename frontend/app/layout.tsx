@@ -6,10 +6,11 @@ import { Clock3, Newspaper, Search, Star, LayoutDashboard } from "lucide-react";
 import "./globals.css";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import { AuthStatusControl } from "@/components/AuthStatusControl";
+import { ThemeToggleButton } from "@/components/ThemeToggleButton";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { RealTimeClock } from "@/components/RealTimeClock";
-import { useUiStore } from "@/lib/store";
+import { useThemeStore, useUiStore } from "@/lib/store";
 import { usePathname } from "next/navigation";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -17,14 +18,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const search = useUiStore((state) => state.search);
   const setSearch = useUiStore((state) => state.setSearch);
+  const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
+
   return (
-    <html lang="en">
-      <body className="bg-[#0a0a0a] text-zinc-100 overflow-hidden">
+    <html lang="en" suppressHydrationWarning>
+      <body className="overflow-hidden bg-[var(--page-bg)] text-[color:var(--text-primary)]">
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var raw=localStorage.getItem('libretix-theme');if(!raw)return;var parsed=JSON.parse(raw);var theme=parsed&&parsed.state&&parsed.state.theme;if(theme==='light'||theme==='dark'){document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;}}catch(e){}})();"
+          }}
+        />
         <AuthBootstrap />
         <div className="flex h-screen overflow-hidden">
 
@@ -33,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <button
               type="button"
               aria-label="Close sidebar"
-              className="fixed inset-0 z-30 bg-black/60 md:hidden"
+              className="fixed inset-0 z-30 bg-[var(--overlay)] md:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -41,29 +54,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Sidebar */}
           <aside
             className={[
-              "fixed inset-y-0 left-0 z-40 w-64 h-screen overflow-hidden border-r border-white/10 bg-black/90 px-4 py-5 backdrop-blur transition-transform duration-200 md:static md:translate-x-0 md:flex md:flex-col",
+              "fixed inset-y-0 left-0 z-40 h-screen w-64 overflow-hidden border-r border-[color:var(--border-color)] bg-[var(--sidebar-bg)] px-4 py-5 backdrop-blur transition-transform duration-200 md:static md:translate-x-0 md:flex md:flex-col",
               sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
             ].join(" ")}
           >
             <div className="flex h-full flex-col overflow-hidden">
-              <Link href="/dashboard" className="mb-8 text-xl font-semibold tracking-[0.2em] text-[#00d964]">
+              <Link href="/dashboard" className="mb-8 text-xl font-semibold tracking-[0.2em] text-[color:var(--accent)]">
                 LIBRETIX
               </Link>
-              <nav className="flex flex-1 flex-col gap-2 overflow-y-auto text-sm">
-                <Link className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-white/5" href="/dashboard">
+              <nav className="flex flex-1 flex-col gap-2 overflow-y-auto text-sm text-[color:var(--text-secondary)]">
+                <Link className="flex items-center gap-2 rounded-md px-3 py-2 transition hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]" href="/dashboard">
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
-                <Link className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-white/5" href="/watchlist">
+                <Link className="flex items-center gap-2 rounded-md px-3 py-2 transition hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]" href="/watchlist">
                   <Star size={16} /> Watchlist
                 </Link>
-                <Link className="flex items-center gap-2 rounded-md px-3 py-2 hover:bg-white/5" href="/news">
+                <Link className="flex items-center gap-2 rounded-md px-3 py-2 transition hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]" href="/news">
                   <Newspaper size={16} /> News
                 </Link>
               </nav>
-              <div className="mt-4 border-t border-white/10 pt-4">
+              <div className="mt-4 border-t border-[color:var(--border-color)] pt-4">
                 <AuthStatusControl />
               </div>
-              <div className="mt-auto text-xs text-white/35">Real-time terminal shell</div>
+              <div className="mt-auto text-xs text-[color:var(--text-faint)]">Real-time terminal shell</div>
             </div>
           </aside>
 
@@ -71,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex min-w-0 flex-1 flex-col overflow-hidden h-screen">
 
             {/* Topbar */}
-            <header className="shrink-0 border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur">
+            <header className="shrink-0 border-b border-[color:var(--border-color)] bg-[var(--page-shell)] backdrop-blur">
               <div className="flex items-center justify-between gap-3 px-4 py-3">
 
                 {/* Kiri: hamburger + logo mobile + search */}
@@ -79,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <button
                     type="button"
                     aria-label="Toggle sidebar"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/10 bg-black/40 text-white/80 md:hidden"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[color:var(--border-color)] bg-[var(--surface-muted)] text-[color:var(--text-secondary)] md:hidden"
                     onClick={() => setSidebarOpen((v) => !v)}
                   >
                     <span className="flex flex-col gap-1.5">
@@ -89,12 +102,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </span>
                   </button>
 
-                  <div className="lg:hidden text-[#00d964] font-semibold tracking-[0.2em]">LIBRETIX</div>
+                  <div className="font-semibold tracking-[0.2em] text-[color:var(--accent)] lg:hidden">LIBRETIX</div>
 
                   {/* Search ticker — hanya di dashboard */}
                   {pathname === "/dashboard" && (
                     <div className="relative w-full max-w-md">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/35" size={16} />
+                      <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--text-faint)]" size={16} />
                       <Input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
@@ -107,8 +120,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
 
                 {/* Kanan: clock */}
-                <div className="flex shrink-0 items-center gap-2 text-xs text-white/60">
-                  <Clock3 size={14} className="text-[#00d964]" />
+                <div className="flex shrink-0 items-center gap-2 text-xs text-[color:var(--text-muted)]">
+                  <ThemeToggleButton />
+                  <Clock3 size={14} className="text-[color:var(--accent)]" />
                   <RealTimeClock />
                 </div>
 

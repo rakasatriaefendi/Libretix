@@ -70,7 +70,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
   return (
     <div className="space-y-4">
       <Link href="/dashboard" className="inline-flex">
-        <Button variant="ghost" size="sm" className="gap-1 text-white/50 hover:text-white">
+        <Button variant="ghost" size="sm" className="gap-1 text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)]">
           {"<-"} Back to Dashboard
         </Button>
       </Link>
@@ -83,7 +83,7 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
                 <h1 className="text-2xl font-semibold">{detail.ticker}</h1>
                 <Badge className="border-[#00d964]/30 text-[#00d964]">{period}</Badge>
               </div>
-              <p className="text-sm text-white/45">{detail.name ?? "Market detail"}</p>
+              <p className="text-sm text-[color:var(--text-muted)]">{detail.name ?? "Market detail"}</p>
               <div className="mt-3">
                 <WatchlistToggleButton ticker={detail.ticker} />
               </div>
@@ -127,8 +127,8 @@ async function StockDetailView({ ticker, period }: { ticker: string; period: Per
             ["Low", statLow],
             ["Volume", statVolume]
           ] as [string, number | null | undefined][]).map(([label, value]) => (
-            <div key={label} className="rounded-lg border border-white/10 bg-black/40 p-3">
-              <div className="text-xs text-white/45">{label}</div>
+            <div key={label} className="rounded-lg border border-[color:var(--border-color)] bg-[var(--surface-muted)] p-3">
+              <div className="text-xs text-[color:var(--text-muted)]">{label}</div>
               <div className="mt-1 text-sm font-medium">
                 {label === "Volume" ? formatCompactVolume(value) : value !== null && value !== undefined ? formatCurrency(value, detail.market, ticker) : "-"}
               </div>

@@ -16,7 +16,7 @@ export function WatchlistToggleButton({ ticker }: { ticker: string }) {
       size="sm"
       onClick={() => toggleTicker(ticker)}
       disabled={disabled}
-      className={saved ? "gap-2" : "gap-2 text-white/75"}
+      className={saved ? "gap-2" : "gap-2 text-[color:var(--text-secondary)]"}
     >
       <Star size={14} className={saved ? "fill-current" : ""} />
       {disabled ? "Saving..." : saved ? "Saved in Watchlist" : "Add to Watchlist"}
