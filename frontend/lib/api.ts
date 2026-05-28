@@ -153,7 +153,7 @@ export async function removeWatchlistTicker(token: string, ticker: string): Prom
 }
 
 export async function getAlerts(token: string): Promise<PriceAlert[]> {
-  return authorizedRequest<PriceAlert[]>("/alerts/", token);
+  return authorizedRequest<PriceAlert[]>("/alerts/?is_triggered=false", token);
 }
 
 export async function createAlert(

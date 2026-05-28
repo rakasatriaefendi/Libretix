@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from backend.dependencies import get_current_user
 from supabase import create_client
@@ -15,9 +15,16 @@ def get_supabase():
     return create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"])
 
 @router.get("/")
-async def get_alerts(user=Depends(get_current_user)):
+async def get_alerts(user=Depends(get_current_user), is_triggered: bool = False):
     sb = get_supabase()
-    result = sb.table("price_alerts").select("*").eq("user_id", user["id"]).order("created_at", desc=True).execute()
+    result = (
+        sb.table("price_alerts")
+        .select("*")
+        .eq("user_id", user["id"])
+        .eq("is_triggered", is_triggered)
+        .order("created_at", desc=True)
+        .execute()
+    )
     return result.data
 
 @router.post("/")
