@@ -86,6 +86,7 @@ async def add_watchlist_item(
 
 
 @router.delete("/{ticker}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{ticker}/", status_code=status.HTTP_204_NO_CONTENT, include_in_schema=False)
 async def delete_watchlist_item(
     ticker: str,
     authorization: str | None = Header(default=None)
