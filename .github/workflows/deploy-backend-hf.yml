@@ -48,6 +48,8 @@ jobs:
           # Mirror backend runtime metadata expected by the HF Space root.
           cp backend/requirements.txt /tmp/hf-space/requirements.txt
           cp backend/.env.example /tmp/hf-space/.env.example
+          cp backend/Dockerfile /tmp/hf-space/Dockerfile
+          cp backend/.gitattributes /tmp/hf-space/.gitattributes
 
           # Commit dan push
           cd /tmp/hf-space
